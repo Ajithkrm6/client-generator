@@ -15,7 +15,7 @@ const packageJson = JSON.parse(
 )
 
 program
-  .name('bs-frontend-generator')
+  .name('client-generator')
   .description('Professional frontend scaffolding framework for Next.js and Vite')
   .version(packageJson.version)
 

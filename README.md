@@ -1,6 +1,6 @@
-# BS-Frontend-Generator 🚀
+# Client-Generator 🚀
 
-**Welcome to Bs-frontend-generator**
+**Welcome to Client-Generator**
 
 **Professional Frontend Scaffolding Framework for Enterprise-Grade React Applications**
 
@@ -125,14 +125,14 @@ BS-Frontend-Generator is an **enterprise-grade frontend scaffolding framework** 
 
 ### 🚀 Installation - Current Development Version
 
-Since BS-Frontend-Generator is still in development, you need to **clone and link** it:
+Since Client-Generator is still in development, you need to **clone and link** it:
 
 #### Step 1: Clone the Repository
 
 ```bash
 # Clone from GitHub
-git clone https://github.com/your-org/bs-frontend-generator.git
-cd BS-Frontend-Generator
+git clone https://github.com/your-org/client-generator.git
+cd client-generator
 ```
 
 #### Step 2: Install Dependencies
@@ -162,19 +162,19 @@ pnpm run build
 # Create symlink globally so command is available from any directory
 pnpm link --global
 
-# This makes 'bs-frontend-generator' command available system-wide
+# This makes 'client-generator' command available system-wide
 ```
 
 #### Step 5: Verify Installation
 
 ```bash
 # Test the command from any directory
-bs-frontend-generator --version
+client-generator --version
 # Output: 1.0.0
 
 # Test from a different location
 cd C:\
-bs-frontend-generator --version
+client-generator --version
 # Still works! ✅
 ```
 
@@ -213,19 +213,19 @@ After installation, use the command from **any directory**:
 cd C:\MYSpace\projects
 
 # Create a new project (works from anywhere!)
-bs-frontend-generator my-awesome-app
+client-generator my-awesome-app
 
 # OR use pnpm create
-pnpm create bs-frontend-generator my-awesome-app
+pnpm create client-generator my-awesome-app
 
 # OR use npm create
-npm create bs-frontend-generator my-awesome-app
+npm create client-generator my-awesome-app
 ```
 
 **Note:** Projects are created in your **current working directory**:
 ```bash
 cd C:\MYSpace\projects
-bs-frontend-generator my-app
+client-generator my-app
 # Creates: C:\MYSpace\projects\my-app
 ```
 

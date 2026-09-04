@@ -1,10 +1,10 @@
 {
-  "name": "bs-frontend-generator",
+  "name": "client-generator",
   "version": "1.0.0",
   "description": "Professional frontend scaffolding framework for Next.js and Vite projects",
   "type": "module",
   "bin": {
-    "bs-frontend-generator": "./bin/cli.js"
+    "client-generator": "./bin/cli.js"
   },
   "main": "./dist/bin/cli.js",
   "scripts": {
