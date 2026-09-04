@@ -1239,6 +1239,34 @@ pnpm type-check
 
 Make sure files are named `.stories.tsx` and placed next to components.
 
+### Known Limitations & Workarounds
+
+#### 1. **Piped Input Defaults to Vite Framework**
+   - **Issue:** When using piped input (e.g., `cat input.txt | bs-frontend-generator my-app`), the first question (framework selection) times out and defaults to Vite
+   - **Workaround:** For reproducible builds in CI/CD, use piped input with all questions answered. Users will get a Vite project instead of Next.js if the framework choice isn't properly read
+   - **Recommendation:** For interactive use, run without piping to select your preferred framework
+   - **Status:** Mitigated by graceful defaults; project generation still succeeds
+
+#### 2. **Vite Projects Don't Generate .env Files**
+   - **Issue:** Vite doesn't require `.env` files for basic usage (uses `import.meta.env` instead)
+   - **Why:** This is Vite's design. Environment variables are handled differently than Next.js
+   - **Workaround:** Manually create `.env` file in Vite projects if needed, or update `vite.config.ts` to specify env prefix
+   - **Note:** For Next.js projects, `.env.local` and `.env.example` are properly generated
+
+#### 3. **Setup Takes 3-5 Minutes**
+   - **Issue:** Project scaffolding appears slow
+   - **Why:** This includes framework CLI execution (create-next-app/create-vite) + npm package installation (~30+ dependencies)
+   - **Status:** This is normal and expected behavior
+   - **Tip:** First run caches npm, subsequent runs will be slightly faster
+
+### Reporting Issues
+
+If you encounter issues not listed above:
+1. Check your Node version: `node --version` (need >=18.17.0)
+2. Check your pnpm version: `pnpm --version` (need >=9.0.0)
+3. Try clearing node_modules: `rm -rf node_modules pnpm-lock.yaml && pnpm install`
+4. Verify the generator itself: `bs-frontend-generator --version` (should output 1.0.0)
+
 ## Support
 
 - 📖 [Next.js Docs](https://nextjs.org)

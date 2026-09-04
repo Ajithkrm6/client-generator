@@ -1,0 +1,58 @@
+# Development and build files
+scripts/
+*.ts
+!dist/**/*.js
+!bin/cli.js
+!package.json
+!README.md
+!LICENSE
+!.npmignore
+
+# Git files
+.git
+.gitignore
+.github/
+
+# Documentation
+docs/
+DEVELOPMENT.md
+CHANGELOG.md
+IMPLEMENTATION_SUMMARY.md
+CONTRIBUTING.md
+.vscode/
+
+# Tests
+__tests__/
+*.test.ts
+*.spec.ts
+vitest.config.ts
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Generated
+dist/**/*.map
+dist/**/*.d.ts.map
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.cache
+temp/

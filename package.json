@@ -4,7 +4,7 @@
   "description": "Professional frontend scaffolding framework for Next.js and Vite projects",
   "type": "module",
   "bin": {
-    "bs-frontend-generator": "./dist/bin/cli.js"
+    "bs-frontend-generator": "./bin/cli.js"
   },
   "main": "./dist/bin/cli.js",
   "scripts": {
@@ -42,10 +42,22 @@
     "zustand",
     "storybook"
   ],
-  "author": "Your Organization",
+  "author": {
+    "name": "Your Organization",
+    "email": "your-email@example.com",
+    "url": "https://your-website.com"
+  },
   "license": "MIT",
+  "homepage": "https://github.com/your-org/bs-frontend-generator#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/bs-frontend-generator"
+    "url": "https://github.com/your-org/bs-frontend-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/bs-frontend-generator/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

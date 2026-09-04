@@ -20,6 +20,55 @@ interface ProjectConfig {
   backendUrl: string
 }
 
+/**
+ * Safely prompt with error handling for piped input
+ * If stdin is closed (piped input ends), use defaults
+ */
+async function safePrompt(questions: any[]) {
+  return new Promise((resolve) => {
+    // Set a timeout to handle readline close gracefully
+    const timeout = setTimeout(() => {
+      console.warn(chalk.yellow('⚠️  Input stream ended, using default values'))
+      const defaults: any = {}
+      for (const q of questions) {
+        // Handle checkbox fields - they should return arrays
+        if (q.type === 'checkbox') {
+          defaults[q.name] = q.default || q.choices?.filter((c: any) => c.checked)?.map((c: any) => c.value) || []
+        } else {
+          defaults[q.name] = q.default || (Array.isArray(q.choices) ? q.choices[0]?.value : '')
+        }
+      }
+      resolve(defaults)
+    }, 100)
+
+    inquirer
+      .prompt(questions)
+      .then((answers) => {
+        clearTimeout(timeout)
+        resolve(answers)
+      })
+      .catch((error: any) => {
+        clearTimeout(timeout)
+        // If readline was closed (piped input), use defaults
+        if (error.code === 'ERR_USE_AFTER_CLOSE' || error.message?.includes('readline')) {
+          console.warn(chalk.yellow('⚠️  Input stream ended, using default values'))
+          const defaults: any = {}
+          for (const q of questions) {
+            // Handle checkbox fields - they should return arrays
+            if (q.type === 'checkbox') {
+              defaults[q.name] = q.default || q.choices?.filter((c: any) => c.checked)?.map((c: any) => c.value) || []
+            } else {
+              defaults[q.name] = q.default || (Array.isArray(q.choices) ? q.choices[0]?.value : '')
+            }
+          }
+          resolve(defaults)
+        } else {
+          throw error
+        }
+      })
+  })
+}
+
 export async function createProject(appName: string) {
   console.log(`\n${chalk.blue('🚀 BS-Frontend-Generator')}`)
   console.log(`${chalk.gray('Professional Frontend Scaffolding Framework')}\n`)
@@ -43,7 +92,7 @@ export async function createProject(appName: string) {
     // PHASE 1: Framework Selection
     // ========================================
     console.log(chalk.cyan('📋 PHASE 1: Framework Selection\n'))
-    const phase1Answers = (await inquirer.prompt(PHASE1_QUESTIONS)) as any
+    const phase1Answers = (await safePrompt(PHASE1_QUESTIONS)) as any
     const framework = phase1Answers.framework
 
     // ========================================
@@ -85,7 +134,7 @@ export async function createProject(appName: string) {
     // PHASE 2: Enhancement Questions
     // ========================================
     console.log(chalk.cyan('📋 PHASE 2: Project Enhancements\n'))
-    const phase2Answers = (await inquirer.prompt(PHASE2_QUESTIONS)) as any
+    const phase2Answers = (await safePrompt(PHASE2_QUESTIONS)) as any
 
     // Combine all answers
     const config: ProjectConfig = {

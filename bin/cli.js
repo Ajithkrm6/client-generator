@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { program } from 'commander'
 import { fileURLToPath } from 'url'
-import { createProject } from '../create-project.js'
+import { createProject } from '../dist/create-project.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
