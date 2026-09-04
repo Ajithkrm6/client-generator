@@ -2,14 +2,14 @@
 
 ## Overview
 
-BS-Frontend-Generator is a scaffolding tool that creates well-structured Next.js and Vite projects with professional development patterns.
+Client-Generator is a scaffolding tool that creates well-structured Next.js and Vite projects with professional development patterns.
 
 ## Architecture
 
 ### Directory Structure
 
 ```
-bs-frontend-generator/
+client-generator/
 ├── bin/
 │   └── cli.js                  # CLI entry point
 ├── scripts/
@@ -51,7 +51,7 @@ bs-frontend-generator/
 
 ### How It Works
 
-1. **CLI Called**: `pnpm create bs-frontend-generator my-app`
+1. **CLI Called**: `pnpm create client-generator my-app`
 2. **Questions Asked**: Interactive questionnaire
 3. **Project Initialized**:
    - Directory created
@@ -68,7 +68,7 @@ bs-frontend-generator/
 ### Setup
 
 ```bash
-cd BS-Frontend-Generator
+cd client-generator
 pnpm install
 pnpm run build
 ```
@@ -204,10 +204,11 @@ export const DEPENDENCIES = {
 ### Generate a Test Project
 
 ```bash
-node dist/bin/cli.js my-test-app
+# Test CLI
+node dist/bin/cli.js test-app
 
 # Or if globally installed
-bs-frontend-generator my-test-app
+client-generator my-test-app
 ```
 
 ### Update Package Version
@@ -223,7 +224,7 @@ bs-frontend-generator my-test-app
 ```bash
 # Test in temporary directory
 cd /tmp
-pnpm create /path/to/BS-Frontend-Generator my-test-app
+pnpm create /path/to/client-generator my-test-app
 ```
 
 ## Publishing

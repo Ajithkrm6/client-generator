@@ -65,9 +65,9 @@
 
 ---
 
-## 📖 What Is BS-Frontend-Generator?
+## 📖 What Is Client-Generator?
 
-BS-Frontend-Generator is an **enterprise-grade frontend scaffolding framework** that eliminates repetitive setup and boilerplate when creating new React applications. It generates production-ready projects with:
+Client-Generator is an **enterprise-grade frontend scaffolding framework** that eliminates repetitive setup and boilerplate when creating new React applications. It generates production-ready projects with:
 
 ✅ **Professional Architecture** - Modular, scalable, maintainable structure  
 ✅ **Best Practices Built-In** - Industry standards applied automatically  
@@ -90,7 +90,7 @@ BS-Frontend-Generator is an **enterprise-grade frontend scaffolding framework** 
 - Documentation about how everything works
 - This takes **6-8 hours per project**
 
-**Solution:** BS-Frontend-Generator automates all of this in **5 minutes**. You answer 14 simple questions, and get a fully-configured, production-ready React project with:
+**Solution:** Client-Generator automates all of this in **5 minutes**. You answer 14 simple questions, and get a fully-configured, production-ready React project with:
 - Chosen architecture (flat or modular)
 - Proper folder structure
 - All dependencies pre-installed
@@ -187,7 +187,7 @@ client-generator --version
 ```
 Your Setup:
 Machine A (Your Computer)
-└── C:\MYSpace\projects\BS-Frontend-Generator/
+└── C:\MYSpace\projects\client-generator/
     └── pnpm link --global ✅ Available here only
 ```
 
@@ -330,15 +330,15 @@ pnpm build
 
 ### Current Setup (Development Version)
 
-BS-Frontend-Generator is currently a **development project**, not yet published to npm. Here's how it works:
+Client-Generator is currently a **development project**, not yet published to npm. Here's how it works across different scenarios:
 
 #### On Your Machine (Development)
 
 **Quick Setup Workflow:**
 ```bash
 # 1️⃣ Clone once
-git clone https://github.com/your-org/bs-frontend-generator.git
-cd BS-Frontend-Generator
+git clone https://github.com/your-org/client-generator.git
+cd client-generator
 
 # 2️⃣ Install dependencies
 pnpm install
@@ -351,12 +351,12 @@ pnpm link --global
 
 # 5️⃣ Verify it works from any directory
 cd C:\
-bs-frontend-generator --version
-# Output: 1.0.0 ✅
+client-generator --version
+# Output: 1.1.0 ✅
 
 # 6️⃣ Now use it from anywhere
 cd C:\MYSpace\projects
-bs-frontend-generator my-app  # ✅ Works!
+client-generator my-app  # ✅ Works!
 ```
 
 #### On Team/Different Machines
@@ -365,34 +365,34 @@ bs-frontend-generator my-app  # ✅ Works!
 
 **Machine A (You):**
 ```bash
-git clone https://github.com/your-org/bs-frontend-generator.git
-cd BS-Frontend-Generator
+git clone https://github.com/your-org/client-generator.git
+cd client-generator
 pnpm install
 pnpm run build
 pnpm link --global
-bs-frontend-generator my-app  # ✅ Works on this machine
+client-generator my-app  # ✅ Works on this machine
 ```
 
 **Machine B (Team Member's Computer):**
 ```bash
 # Same steps needed
-git clone https://github.com/your-org/bs-frontend-generator.git
-cd BS-Frontend-Generator
+git clone https://github.com/your-org/client-generator.git
+cd client-generator
 pnpm install
 pnpm run build
 pnpm link --global
-bs-frontend-generator my-app  # ✅ Works on this machine
+client-generator my-app  # ✅ Works on this machine
 ```
 
 **Machine C (Another Team Member):**
 ```bash
 # Same steps needed
-git clone https://github.com/your-org/bs-frontend-generator.git
-cd BS-Frontend-Generator
+git clone https://github.com/your-org/client-generator.git
+cd client-generator
 pnpm install
 pnpm run build
 pnpm link --global
-bs-frontend-generator my-app  # ✅ Works on this machine
+client-generator my-app  # ✅ Works on this machine
 ```
 
 ---
@@ -403,14 +403,14 @@ bs-frontend-generator my-app  # ✅ Works on this machine
 ```bash
 pnpm link --global
 # Creates a symlink (shortcut) from global pnpm folder to your local project
-# Makes 'bs-frontend-generator' command available from any directory
+# Makes 'client-generator' command available from any directory
 ```
 
 **Behind the scenes:**
 ```
 Global pnpm folder (symlink created here)
     ↓
-    └─→ Points to: C:\MYSpace\projects\BS-Frontend-Generator\dist\bin\cli.js
+    └─→ Points to: C:\MYSpace\projects\client-generator\dist\bin\cli.js
 ```
 
 **When to use pnpm link --global:**
@@ -429,10 +429,10 @@ Global pnpm folder (symlink created here)
 
 ```bash
 # Remove the global symlink
-pnpm unlink --global bs-frontend-generator
+pnpm unlink --global client-generator
 
 # Verify it's removed
-bs-frontend-generator --version
+client-generator --version
 # Command not found ✅ (successfully unlinked)
 ```
 
@@ -444,15 +444,15 @@ Once published to **npm registry**, no cloning needed:
 
 ```bash
 # Any machine, any user:
-npm install -g bs-frontend-generator
+npm install -g client-generator
 # OR
-pnpm add -g bs-frontend-generator
+pnpm add -g client-generator
 
 # Command available immediately, no cloning!
-bs-frontend-generator my-app  # ✅ Works everywhere
+client-generator my-app  # ✅ Works everywhere
 
 # To remove
-npm uninstall -g bs-frontend-generator
+npm uninstall -g client-generator
 ```
 
 ---
@@ -461,28 +461,28 @@ npm uninstall -g bs-frontend-generator
 
 #### Scenario 1: You (Developer - Want to Test Changes)
 ```bash
-cd C:\MYSpace\projects\BS-Frontend-Generator
+cd C:\MYSpace\projects\client-generator
 pnpm link --global           # Link once
 # Make changes to code...
 pnpm run build               # Rebuild after changes
-bs-frontend-generator my-app # Test your changes
+client-generator my-app # Test your changes
 pnpm unlink --global         # Cleanup when done
 ```
 
 #### Scenario 2: Team Member (Want to Use/Contribute)
 ```bash
 # First time only
-git clone https://github.com/your-org/bs-frontend-generator.git
-cd BS-Frontend-Generator
+git clone https://github.com/your-org/client-generator.git
+cd client-generator
 pnpm install
 pnpm run build
 pnpm link --global
 
 # Now they can use it
-bs-frontend-generator my-app ✅
+client-generator my-app ✅
 
 # If they pull new changes
-cd BS-Frontend-Generator
+cd client-generator
 git pull
 pnpm run build  # Rebuild
 # Command automatically updated! ✅
@@ -492,18 +492,18 @@ pnpm run build  # Rebuild
 
 ## 📟 CLI Commands Reference
 
-### BS-Frontend-Generator Commands
+### Client-Generator Commands
 
 These commands work after you've linked globally (`pnpm link --global`):
 
 #### Create a Project
 ```bash
-bs-frontend-generator <app-name>
+client-generator <app-name>
 ```
 
 **Example:**
 ```bash
-bs-frontend-generator tax-management-app
+client-generator tax-management-app
 # Creates: tax-management-app/ in current directory
 ```
 
@@ -514,36 +514,36 @@ bs-frontend-generator tax-management-app
 
 #### Get Version
 ```bash
-bs-frontend-generator --version
-# Output: 1.0.0
+client-generator --version
+# Output: 1.1.0
 
 # Alternative:
-bs-frontend-generator -v
+client-generator -v
 ```
 
 #### Get Help
 ```bash
-bs-frontend-generator --help
+client-generator --help
 # Shows all available options
 
 # Alternative:
-bs-frontend-generator -h
+client-generator -h
 ```
 
 #### Advanced Options (CLI Flags)
 
 ```bash
 # Use default choices for everything (non-interactive mode)
-bs-frontend-generator <app-name> --defaults
+client-generator <app-name> --defaults
 
 # Skip dependency installation (install manually later)
-bs-frontend-generator <app-name> --no-install
+client-generator <app-name> --no-install
 
 # Don't initialize git repository
-bs-frontend-generator <app-name> --no-git
+client-generator <app-name> --no-git
 
 # Combine options
-bs-frontend-generator my-app --defaults --no-install
+client-generator my-app --defaults --no-install
 ```
 
 ---
@@ -906,7 +906,7 @@ my-app/
 
 ### ✨ What's Pre-configured
 
-Files with ✨ are **auto-generated and pre-configured** by BS-Frontend-Generator:
+Files with ✨ are **auto-generated and pre-configured** by Client-Generator:
 
 - **`tsconfig.json`** - TypeScript strict mode (no `any` types)
 - **`package.json`** - All dependencies exact versions (no `^` or `~`)
@@ -1242,7 +1242,7 @@ Make sure files are named `.stories.tsx` and placed next to components.
 ### Known Limitations & Workarounds
 
 #### 1. **Piped Input Defaults to Vite Framework**
-   - **Issue:** When using piped input (e.g., `cat input.txt | bs-frontend-generator my-app`), the first question (framework selection) times out and defaults to Vite
+   - **Issue:** When using piped input (e.g., `cat input.txt | client-generator my-app`), the first question (framework selection) times out and defaults to Vite
    - **Workaround:** For reproducible builds in CI/CD, use piped input with all questions answered. Users will get a Vite project instead of Next.js if the framework choice isn't properly read
    - **Recommendation:** For interactive use, run without piping to select your preferred framework
    - **Status:** Mitigated by graceful defaults; project generation still succeeds
@@ -1265,7 +1265,7 @@ If you encounter issues not listed above:
 1. Check your Node version: `node --version` (need >=18.17.0)
 2. Check your pnpm version: `pnpm --version` (need >=9.0.0)
 3. Try clearing node_modules: `rm -rf node_modules pnpm-lock.yaml && pnpm install`
-4. Verify the generator itself: `bs-frontend-generator --version` (should output 1.0.0)
+4. Verify the generator itself: `client-generator --version` (should output 1.1.0)
 
 ## Support
 

@@ -48,13 +48,13 @@
     "url": "https://your-website.com"
   },
   "license": "MIT",
-  "homepage": "https://github.com/your-org/bs-frontend-generator#readme",
+  "homepage": "https://github.com/your-org/client-generator#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/bs-frontend-generator.git"
+    "url": "https://github.com/your-org/client-generator.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/bs-frontend-generator/issues"
+    "url": "https://github.com/your-org/client-generator/issues"
   },
   "publishConfig": {
     "access": "public",

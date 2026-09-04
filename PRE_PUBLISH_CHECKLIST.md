@@ -87,7 +87,7 @@
 ### Bug #1: Path Resolution Issues (Fixed)
 - ✅ package.json "bin": Changed from `./dist/bin/cli.js` → `./bin/cli.js`
 - ✅ bin/cli.js import: Changed from `../create-project.js` → `../dist/create-project.js`
-- ✅ Verified: `bs-frontend-generator --version` works
+- ✅ Verified: `client-generator --version` works
 
 ### Bug #2: Checkbox Default Handling (Fixed - NEW)
 - **Issue:** `config.sampleModules.join is not a function` 
@@ -102,10 +102,10 @@
 
 | Test | Result | Command | Notes |
 |------|--------|---------|-------|
-| Installation | ✅ | `npm install -g bs-frontend-generator` | (Will work after npm publish) |
+| Installation | ✅ | `npm install -g client-generator` | (Will work after npm publish) |
 | Build | ✅ | `pnpm run build` | No TypeScript errors |
-| CLI Version | ✅ | `bs-frontend-generator --version` | Returns 1.0.0 |
-| CLI Help | ✅ | `bs-frontend-generator --help` | Displays usage correctly |
+| CLI Version | ✅ | `client-generator --version` | Returns 1.0.0 |
+| CLI Help | ✅ | `client-generator --help` | Displays usage correctly |
 | Project Gen (Vite) | ✅ | Piped input test | Project created successfully |
 | Project Gen (Next.js) | ✅ | Test input file | Structure verified |
 | Dependencies | ✅ | package.json scan | All exact versions specified |
@@ -175,12 +175,12 @@ npm login
 npm publish
 
 # 4. Verify (after ~2-5 seconds)
-npm search bs-frontend-generator
-npm info bs-frontend-generator
+npm search client-generator
+npm info client-generator
 
 # 5. Test global installation
-npm install -g bs-frontend-generator
-bs-frontend-generator --version
+npm install -g client-generator
+client-generator --version
 ```
 
 ---

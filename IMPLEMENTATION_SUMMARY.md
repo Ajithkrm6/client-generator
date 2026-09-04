@@ -1,8 +1,8 @@
-# BS-Frontend-Generator - Implementation Summary
+# Client-Generator - Implementation Summary
 
 ## 🎉 Project Created Successfully!
 
-BS-Frontend-Generator has been fully implemented and is ready to use!
+Client-Generator has been fully implemented and is ready to use!
 
 ### Location
 ```
@@ -12,7 +12,7 @@ C:\MYSpace\projects\BS-Frontend-Generator
 ### Project Structure
 
 ```
-BS-Frontend-Generator/
+Client-Generator/
 ├── 📁 bin/
 │   └── cli.js                      CLI entry point
 │
@@ -37,7 +37,7 @@ BS-Frontend-Generator/
 ### ✅ Interactive CLI
 
 ```bash
-pnpm create bs-frontend-generator my-app
+pnpm create client-generator my-app
 
 # Prompts user with 15 questions:
 ? Framework: Next.js / Vite
@@ -122,17 +122,17 @@ Creates professional Next.js/Vite projects with:
 ### 1. Install (Optional - for Global Use)
 
 ```bash
-npm install -g bs-frontend-generator
+npm install -g client-generator
 ```
 
 ### 2. Create Project
 
 ```bash
 # Via pnpm (recommended)
-pnpm create bs-frontend-generator my-app
+pnpm create client-generator my-app
 
 # Or globally
-bs-frontend-generator my-app
+client-generator my-app
 ```
 
 ### 3. Follow Interactive Setup
@@ -211,7 +211,7 @@ my-app/
 
 ## Documentation Included
 
-### In BS-Frontend-Generator
+### In Client-Generator
 - **README.md** - User guide for using the generator
 - **DEVELOPMENT.md** - Developer guide for contributing
 - **CHANGELOG.md** - Version history and roadmap
@@ -227,7 +227,7 @@ my-app/
 
 ```bash
 # Development
-cd BS-Frontend-Generator
+cd client-generator
 pnpm run build         # Compile TypeScript
 pnpm create my-app     # Test project creation
 
@@ -268,7 +268,7 @@ pnpm build            # Production build
 
 1. **Test Project Creation**
    ```bash
-   pnpm create bs-frontend-generator test-app
+   pnpm create client-generator test-app
    cd test-app
    pnpm dev
    ```
@@ -280,7 +280,7 @@ pnpm build            # Production build
    - Try Storybook
 
 3. **Customize if Needed**
-   - Update templates in BS-Frontend-Generator
+   - Update templates in Client-Generator
    - Modify questionnaire
    - Add/remove dependencies
    - Rebuild: `pnpm run build`
@@ -319,11 +319,11 @@ pnpm build            # Production build
 
 ## 🚀 Ready to Use!
 
-BS-Frontend-Generator is now fully functional and can generate professional Next.js/Vite projects with industry best practices!
+Client-Generator is now fully functional and can generate professional Next.js/Vite projects with industry best practices!
 
 **Start using it:**
 ```bash
-pnpm create bs-frontend-generator my-awesome-app
+pnpm create client-generator my-awesome-app
 ```
 
 Created: 2026-09-03

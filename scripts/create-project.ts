@@ -70,7 +70,7 @@ async function safePrompt(questions: any[]) {
 }
 
 export async function createProject(appName: string) {
-  console.log(`\n${chalk.blue('🚀 BS-Frontend-Generator')}`)
+  console.log(`\n${chalk.blue('🚀 Client-Generator')}`)
   console.log(`${chalk.gray('Professional Frontend Scaffolding Framework')}\n`)
 
   // Validate app name
