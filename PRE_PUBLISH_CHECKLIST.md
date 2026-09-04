@@ -211,5 +211,5 @@ bs-frontend-generator --version
 ---
 
 Generated: 2026-09-04  
-Generator Version: 1.0.0  
-Project Status: Ready
+Client-Generator Version: 1.1.0  
+Project Status: Production Ready

@@ -10,8 +10,8 @@
 
 | Item | Details |
 |------|---------|
-| **Version** | 1.0.0 |
-| **Status** | 🚧 Development (Clone & Link Globally) |
+| **Version** | 1.1.0 |
+| **Status** | ✅ Production Ready (Clone & Link Globally) |
 | **Author** | Ajith kumar |
 | **License** | MIT |
 | **Repository** | [GitHub](https://github.com/Ajithkrm6/client-generator.git) |
