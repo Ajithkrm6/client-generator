@@ -22,33 +22,43 @@ interface ProjectConfig {
 
 /**
  * Safely prompt with error handling for piped input
- * If stdin is closed (piped input ends), use defaults
+ * In interactive mode: waits for user input with no timeout
+ * In piped mode: uses timeout to handle closed input stream gracefully
  */
 async function safePrompt(questions: any[]) {
   return new Promise((resolve) => {
-    // Set a timeout to handle readline close gracefully
-    const timeout = setTimeout(() => {
-      console.warn(chalk.yellow('⚠️  Input stream ended, using default values'))
-      const defaults: any = {}
-      for (const q of questions) {
-        // Handle checkbox fields - they should return arrays
-        if (q.type === 'checkbox') {
-          defaults[q.name] = q.default || q.choices?.filter((c: any) => c.checked)?.map((c: any) => c.value) || []
-        } else {
-          defaults[q.name] = q.default || (Array.isArray(q.choices) ? q.choices[0]?.value : '')
+    // Check if stdin is interactive (TTY - Terminal) or piped
+    const isInteractive = process.stdin.isTTY
+    
+    // Only set timeout for piped input (non-TTY)
+    // For interactive mode, inquirer handles it naturally
+    let timeout: NodeJS.Timeout | null = null
+    
+    if (!isInteractive) {
+      // Piped input: use timeout to handle gracefully when input stream ends
+      timeout = setTimeout(() => {
+        console.warn(chalk.yellow('⚠️  Input stream ended, using default values'))
+        const defaults: any = {}
+        for (const q of questions) {
+          // Handle checkbox fields - they should return arrays
+          if (q.type === 'checkbox') {
+            defaults[q.name] = q.default || q.choices?.filter((c: any) => c.checked)?.map((c: any) => c.value) || []
+          } else {
+            defaults[q.name] = q.default || (Array.isArray(q.choices) ? q.choices[0]?.value : '')
+          }
         }
-      }
-      resolve(defaults)
-    }, 100)
+        resolve(defaults)
+      }, 500) // Longer timeout (500ms) for piped input to process
+    }
 
     inquirer
       .prompt(questions)
       .then((answers) => {
-        clearTimeout(timeout)
+        if (timeout) clearTimeout(timeout)
         resolve(answers)
       })
       .catch((error: any) => {
-        clearTimeout(timeout)
+        if (timeout) clearTimeout(timeout)
         // If readline was closed (piped input), use defaults
         if (error.code === 'ERR_USE_AFTER_CLOSE' || error.message?.includes('readline')) {
           console.warn(chalk.yellow('⚠️  Input stream ended, using default values'))

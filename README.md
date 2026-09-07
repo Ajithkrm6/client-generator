@@ -17,7 +17,7 @@
 | **Repository** | [GitHub](https://github.com/Ajithkrm6/client-generator.git) |
 | **Contact** | ajithkumar.tech22@gmail.com |
 
-⚠️ **Current Setup:** Must clone repository and use `pnpm link --global` to make command available. See [Installation](#installation---current-development-version) section below.
+⚠️ **Current Setup:** Must clone repository and use `pnpm link --global .` to make command available. See [Installation](#installation---current-development-version) section below.
 
 
 ---
@@ -62,6 +62,14 @@
 - **Husky** - Git pre-commit hooks
 - **lint-staged** - Run linters on staged files
 - **pnpm 9.0.0+** - Fast, space-efficient package manager
+
+---
+
+⚠️ **Version Note:** The versions listed above are reference versions. When generating a project:
+- **Framework versions** (Next.js, Vite) may be slightly different since `create-next-app@latest` and `create-vite@latest` install the latest available version at generation time
+- **Other packages** use the exact versions specified in `scripts/dependencies.config.ts`
+- Check your generated project's `package.json` for actual installed versions
+- All combinations are tested and compatible
 
 ---
 
@@ -160,7 +168,7 @@ pnpm run build
 
 ```bash
 # Create symlink globally so command is available from any directory
-pnpm link --global
+pnpm link --global .
 
 # This makes 'client-generator' command available system-wide
 ```
@@ -188,7 +196,7 @@ client-generator --version
 Your Setup:
 Machine A (Your Computer)
 └── C:\MYSpace\projects\client-generator/
-    └── pnpm link --global ✅ Available here only
+    └── pnpm link --global . ✅ Available here only
 ```
 
 **Other machines (Team/Different Computers):**
@@ -347,7 +355,7 @@ pnpm install
 pnpm run build
 
 # 4️⃣ Link globally (creates symlink - this makes the command available everywhere!)
-pnpm link --global
+pnpm link --global .
 
 # 5️⃣ Verify it works from any directory
 cd C:\
@@ -369,7 +377,7 @@ git clone https://github.com/your-org/client-generator.git
 cd client-generator
 pnpm install
 pnpm run build
-pnpm link --global
+pnpm link --global .
 client-generator my-app  # ✅ Works on this machine
 ```
 
@@ -380,7 +388,7 @@ git clone https://github.com/your-org/client-generator.git
 cd client-generator
 pnpm install
 pnpm run build
-pnpm link --global
+pnpm link --global .
 client-generator my-app  # ✅ Works on this machine
 ```
 
@@ -391,7 +399,7 @@ git clone https://github.com/your-org/client-generator.git
 cd client-generator
 pnpm install
 pnpm run build
-pnpm link --global
+pnpm link --global .
 client-generator my-app  # ✅ Works on this machine
 ```
 
@@ -401,7 +409,7 @@ client-generator my-app  # ✅ Works on this machine
 
 **What it does:**
 ```bash
-pnpm link --global
+pnpm link --global .
 # Creates a symlink (shortcut) from global pnpm folder to your local project
 # Makes 'client-generator' command available from any directory
 ```
@@ -413,7 +421,7 @@ Global pnpm folder (symlink created here)
     └─→ Points to: C:\MYSpace\projects\client-generator\dist\bin\cli.js
 ```
 
-**When to use pnpm link --global:**
+**When to use `pnpm link --global .`:**
 - ✅ During development (test changes immediately)
 - ✅ Local testing before publishing to npm
 - ✅ Team development with shared repository
@@ -462,7 +470,7 @@ npm uninstall -g client-generator
 #### Scenario 1: You (Developer - Want to Test Changes)
 ```bash
 cd C:\MYSpace\projects\client-generator
-pnpm link --global           # Link once
+pnpm link --global .         # Link once (. = current directory)
 # Make changes to code...
 pnpm run build               # Rebuild after changes
 client-generator my-app # Test your changes
@@ -476,7 +484,7 @@ git clone https://github.com/your-org/client-generator.git
 cd client-generator
 pnpm install
 pnpm run build
-pnpm link --global
+pnpm link --global .
 
 # Now they can use it
 client-generator my-app ✅
@@ -494,7 +502,7 @@ pnpm run build  # Rebuild
 
 ### Client-Generator Commands
 
-These commands work after you've linked globally (`pnpm link --global`):
+These commands work after you've linked globally (`pnpm link --global .`):
 
 #### Create a Project
 ```bash
@@ -1258,6 +1266,13 @@ Make sure files are named `.stories.tsx` and placed next to components.
    - **Why:** This includes framework CLI execution (create-next-app/create-vite) + npm package installation (~30+ dependencies)
    - **Status:** This is normal and expected behavior
    - **Tip:** First run caches npm, subsequent runs will be slightly faster
+
+#### 4. **Framework Version Mismatch**
+   - **Issue:** Generated project shows different version than README (e.g., Next.js 14.3.0 instead of 14.2.3)
+   - **Why:** Client-Generator uses `create-next-app@latest` and `create-vite@latest` which install the latest available version at generation time
+   - **What to do:** This is normal and expected. Check your generated project's `package.json` for actual versions
+   - **How to lock versions:** To pin exact versions, modify `create-next-app` call in `scripts/create-project.ts` to specify version explicitly
+   - **Status:** This is by design to ensure users get latest bug fixes and security patches
 
 ### Reporting Issues
 
