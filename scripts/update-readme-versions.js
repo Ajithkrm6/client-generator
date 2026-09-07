@@ -44,7 +44,7 @@ const versions = {
   zod: extractVersion(configContent, 'zod'),
   tailwind: extractVersion(configContent, 'tailwindcss'),
   axios: extractVersion(configContent, 'axios'),
-  storybook: '^7.6.0',
+  storybook: extractVersion(configContent, '@storybook/react'),
   husky: 'latest',
   'lint-staged': 'latest',
   pnpm: '9.0.0+'

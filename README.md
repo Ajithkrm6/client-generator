@@ -51,7 +51,7 @@
 ### UI & Styling
 - **Tailwind CSS 4.3.3** - Utility-first CSS framework
 - **shadcn/ui** - 18+ pre-built accessible components
-- **Storybook ^7.6.0** - Component documentation & visual regression
+- **Storybook 10.6.0** - Component documentation & visual regression
 
 ### Testing
 - **Vitest** - Unit & component testing
