@@ -25,31 +25,31 @@
 ## 🛠️ Tech Stack
 
 ### Core Frameworks
-- **Next.js 14.2.3** - Full-stack React framework with App Router
-- **Vite 5.0.0** - Lightning-fast SPA bundler
-- **React 19.0.0** - Modern UI library with server components
+- **Next.js 16.3.4** - Full-stack React framework with App Router
+- **Vite 8.2.2** - Lightning-fast SPA bundler
+- **React 19.2.8** - Modern UI library with server components
 
 ### Language & Type Safety
-- **TypeScript 5.5.2** - Strict mode, 0 `any` types
+- **TypeScript 7.0.2** - Strict mode, 0 `any` types
 - **ESLint + Prettier** - Code quality & formatting
 
 ### State Management
-- **Zustand 5.0.0** - Lightweight, intuitive global state
-- **Immer 10.0.0** - Immutable state updates
-- **React Query 5.28.0** - Server state management with automatic caching
+- **Zustand 5.0.15** - Lightweight, intuitive global state
+- **Immer 11.1.18** - Immutable state updates
+- **React Query 5.102.8** - Server state management with automatic caching
 
 ### Forms & Validation
-- **react-hook-form 7.48.0** - Performant form state management
-- **Zod 4.4.0** - TypeScript-first schema validation
+- **react-hook-form 7.87.0** - Performant form state management
+- **Zod 4.5.4** - TypeScript-first schema validation
 - **@hookform/resolvers** - Integration layer
 
 ### API & HTTP
-- **Axios 1.6.0** - HTTP client with interceptors
+- **Axios 1.20.0** - HTTP client with interceptors
 - **JWT Token Management** - Automatic localStorage token injection
 - **401 Redirect** - Automatic login redirect on auth failure
 
 ### UI & Styling
-- **Tailwind CSS 4.0.0** - Utility-first CSS framework
+- **Tailwind CSS 4.3.3** - Utility-first CSS framework
 - **shadcn/ui** - 18+ pre-built accessible components
 - **Storybook ^7.6.0** - Component documentation & visual regression
 

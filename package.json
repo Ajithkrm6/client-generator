@@ -12,6 +12,7 @@
     "dev": "ts-node scripts/create-project.ts",
     "create": "node dist/bin/cli.js",
     "update-versions": "node scripts/update-readme-versions.js",
+    "fetch-latest-versions": "node scripts/fetch-latest-versions.js",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
