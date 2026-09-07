@@ -22,46 +22,40 @@ interface ProjectConfig {
 
 /**
  * Safely prompt with error handling for piped input
- * In interactive mode: waits for user input with no timeout
- * In piped mode: uses timeout to handle closed input stream gracefully
+ * Lets inquirer handle all prompting naturally without interference
+ * Only uses defaults if there's an actual error (stdin closed)
  */
 async function safePrompt(questions: any[]) {
   return new Promise((resolve) => {
-    // Check if stdin is interactive (TTY - Terminal) or piped
-    const isInteractive = process.stdin.isTTY
-    
-    // Only set timeout for piped input (non-TTY)
-    // For interactive mode, inquirer handles it naturally
-    let timeout: NodeJS.Timeout | null = null
-    
-    if (!isInteractive) {
-      // Piped input: use timeout to handle gracefully when input stream ends
-      timeout = setTimeout(() => {
-        console.warn(chalk.yellow('⚠️  Input stream ended, using default values'))
-        const defaults: any = {}
-        for (const q of questions) {
-          // Handle checkbox fields - they should return arrays
-          if (q.type === 'checkbox') {
-            defaults[q.name] = q.default || q.choices?.filter((c: any) => c.checked)?.map((c: any) => c.value) || []
-          } else {
-            defaults[q.name] = q.default || (Array.isArray(q.choices) ? q.choices[0]?.value : '')
-          }
-        }
-        resolve(defaults)
-      }, 500) // Longer timeout (500ms) for piped input to process
+    // Setup readline error handler to suppress ERR_USE_AFTER_CLOSE
+    const suppressReadlineError = (error: any) => {
+      // Suppress only readline-related errors (happens when piped input ends)
+      if (error && (error.code === 'ERR_USE_AFTER_CLOSE' || error.message?.includes('readline'))) {
+        // Silently ignore - expected when input stream closes
+        return
+      }
+      // Re-throw other errors
+      throw error
     }
+
+    const uncaughtHandler = (error: any) => {
+      suppressReadlineError(error)
+    }
+
+    // Add handler but don't prevent normal operation
+    process.once('uncaughtException', uncaughtHandler)
 
     inquirer
       .prompt(questions)
       .then((answers) => {
-        if (timeout) clearTimeout(timeout)
+        process.removeListener('uncaughtException', uncaughtHandler)
         resolve(answers)
       })
       .catch((error: any) => {
-        if (timeout) clearTimeout(timeout)
-        // If readline was closed (piped input), use defaults
+        process.removeListener('uncaughtException', uncaughtHandler)
+        // Only handle stdin/readline errors - piped input ended
         if (error.code === 'ERR_USE_AFTER_CLOSE' || error.message?.includes('readline')) {
-          console.warn(chalk.yellow('⚠️  Input stream ended, using default values'))
+          console.warn(chalk.yellow('\n⚠️  Input stream ended, using default values'))
           const defaults: any = {}
           for (const q of questions) {
             // Handle checkbox fields - they should return arrays
@@ -73,7 +67,9 @@ async function safePrompt(questions: any[]) {
           }
           resolve(defaults)
         } else {
-          throw error
+          // Re-throw other errors
+          console.error(chalk.red('❌ Error during prompt:'), error.message)
+          process.exit(1)
         }
       })
   })

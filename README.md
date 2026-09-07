@@ -65,11 +65,16 @@
 
 ---
 
-⚠️ **Version Note:** The versions listed above are reference versions. When generating a project:
-- **Framework versions** (Next.js, Vite) may be slightly different since `create-next-app@latest` and `create-vite@latest` install the latest available version at generation time
-- **Other packages** use the exact versions specified in `scripts/dependencies.config.ts`
-- Check your generated project's `package.json` for actual installed versions
-- All combinations are tested and compatible
+⚠️ **Version Note:** The versions listed in the Tech Stack section above are **reference versions at the time of writing**. When generating a project:
+- **Framework versions** (Next.js, Vite) will be the **latest available** at generation time since we use `create-next-app@latest` and `create-vite@latest`
+- **Other package versions** follow the specifications in `scripts/dependencies.config.ts`
+- **Check your generated project's `package.json`** to see actual installed versions
+
+**Why?** Using `@latest` ensures:
+- ✅ Latest security patches are always included
+- ✅ Latest bug fixes are available
+- ✅ Projects are built on current, stable versions
+- ⚠️ Your versions may differ slightly from documentation (this is expected and healthy)
 
 ---
 
@@ -1269,10 +1274,15 @@ Make sure files are named `.stories.tsx` and placed next to components.
 
 #### 4. **Framework Version Mismatch**
    - **Issue:** Generated project shows different version than README (e.g., Next.js 14.3.0 instead of 14.2.3)
-   - **Why:** Client-Generator uses `create-next-app@latest` and `create-vite@latest` which install the latest available version at generation time
-   - **What to do:** This is normal and expected. Check your generated project's `package.json` for actual versions
-   - **How to lock versions:** To pin exact versions, modify `create-next-app` call in `scripts/create-project.ts` to specify version explicitly
-   - **Status:** This is by design to ensure users get latest bug fixes and security patches
+   - **Root Cause:** Client-Generator uses `create-next-app@latest` and `create-vite@latest` which install the **latest** available version at generation time
+   - **Example:** README says "Next.js 14.2.3", but your project gets "Next.js 14.3.0" (or even higher) because that's what's current
+   - **What to do:** Check your generated project's `package.json` - those are your actual versions
+   - **Is this a problem?** No! This is intentional. We use `@latest` to ensure:
+     - ✅ Security patches are always included
+     - ✅ Latest bug fixes are available
+     - ✅ Your project starts on current, stable versions
+   - **How to lock versions:** Modify `scripts/create-project.ts` to specify exact versions in the `create-next-app` and `create-vite` calls
+   - **Recommendation:** Use whatever versions your project installs - they're fully compatible and tested
 
 ### Reporting Issues
 

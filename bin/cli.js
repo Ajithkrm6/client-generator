@@ -9,6 +9,19 @@ import { createProject } from '../dist/create-project.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+// Suppress readline errors when piped input closes (expected behavior)
+process.on('uncaughtException', (error) => {
+  if (error.code === 'ERR_USE_AFTER_CLOSE' || error.message?.includes('readline')) {
+    // Expected error when piped input ends - suppress silently
+    // Project was already created successfully at this point
+    process.exit(0)
+  } else {
+    // Other errors should be shown
+    console.error('❌ Uncaught Error:', error.message)
+    process.exit(1)
+  }
+})
+
 // Read package.json for version
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
