@@ -51,7 +51,7 @@
 ### UI & Styling
 - **Tailwind CSS 4.0.0** - Utility-first CSS framework
 - **shadcn/ui** - 18+ pre-built accessible components
-- **Storybook 7.6.0** - Component documentation & visual regression
+- **Storybook ^7.6.0** - Component documentation & visual regression
 
 ### Testing
 - **Vitest** - Unit & component testing
@@ -65,7 +65,7 @@
 
 ---
 
-⚠️ **Version Note:** The versions listed in the Tech Stack section above are **reference versions at the time of writing**. When generating a project:
+⚠️ **Version Note:** The versions listed in the Tech Stack section above are **reference versions used by Client-Generator**. When generating a project:
 - **Framework versions** (Next.js, Vite) will be the **latest available** at generation time since we use `create-next-app@latest` and `create-vite@latest`
 - **Other package versions** follow the specifications in `scripts/dependencies.config.ts`
 - **Check your generated project's `package.json`** to see actual installed versions
@@ -75,8 +75,6 @@
 - ✅ Latest bug fixes are available
 - ✅ Projects are built on current, stable versions
 - ⚠️ Your versions may differ slightly from documentation (this is expected and healthy)
-
----
 
 ## 📖 What Is Client-Generator?
 
