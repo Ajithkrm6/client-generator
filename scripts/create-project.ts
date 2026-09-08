@@ -163,13 +163,15 @@ export async function createProject(appName: string) {
     // ========================================
     console.log(chalk.cyan('\n🔧 Applying enhancements...\n'))
 
-    // Setup component structure
+    // Setup component structure and copy reference templates
     await setupComponentStructure(projectPath, config)
+    await copyReferenceTemplates(projectPath, config)
 
     // Setup modular structure (if applicable)
     if (config.architecture === 'modular' && config.framework === 'nextjs') {
       await setupModularStructure(projectPath, config.sampleModules || [])
       await setupFeatureGates(projectPath, config.sampleModules || [])
+      await copyModuleTemplates(projectPath, config)
     }
 
     // Setup Storybook
@@ -233,6 +235,93 @@ async function setupComponentStructure(projectPath: string, config: ProjectConfi
   }
   
   console.log(chalk.green('✓ Component structure created'))
+}
+
+/**
+ * Copy reference template files to generated project
+ * Includes layout components, welcome page, and examples
+ */
+async function copyReferenceTemplates(projectPath: string, config: ProjectConfig) {
+  if (config.framework !== 'nextjs') {
+    return // Only for Next.js for now
+  }
+
+  const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
+  const srcPath = path.join(projectPath, 'src')
+  const appPath = path.join(projectPath, 'app')
+
+  // Copy layout components
+  const layoutTemplateDir = path.join(templateDir, 'components', 'layout')
+  const layoutDestDir = path.join(srcPath, 'components', 'layout')
+  
+  if (fs.existsSync(layoutTemplateDir)) {
+    fs.copySync(layoutTemplateDir, layoutDestDir, { overwrite: true })
+  }
+
+  // Copy welcome page
+  const pageTemplate = path.join(templateDir, 'app', 'page.tsx')
+  if (fs.existsSync(pageTemplate)) {
+    fs.copySync(pageTemplate, path.join(appPath, 'page.tsx'), { overwrite: false })
+  }
+
+  // Copy dashboard example
+  const dashboardTemplate = path.join(templateDir, 'app', 'dashboard')
+  if (fs.existsSync(dashboardTemplate)) {
+    fs.ensureDirSync(path.join(appPath, 'dashboard'))
+    fs.copySync(dashboardTemplate, path.join(appPath, 'dashboard'), { overwrite: false })
+  }
+
+  // Copy feature-gate library
+  const featureGateTemplate = path.join(templateDir, 'src', 'lib', 'feature-gate.tsx')
+  if (fs.existsSync(featureGateTemplate)) {
+    fs.ensureDirSync(path.join(srcPath, 'lib'))
+    fs.copySync(featureGateTemplate, path.join(srcPath, 'lib', 'feature-gate.tsx'), { overwrite: false })
+  }
+
+  console.log(chalk.green('✓ Reference templates copied'))
+}
+
+/**
+ * Copy module templates for modular architecture
+ * Includes auth and dashboard module examples
+ */
+async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
+  if (config.framework !== 'nextjs') {
+    return // Only for Next.js for now
+  }
+
+  const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
+  const srcPath = path.join(projectPath, 'src')
+  const appPath = path.join(projectPath, 'app')
+
+  // Copy auth module
+  const authModuleTemplate = path.join(templateDir, 'src', 'modules', 'auth')
+  if (fs.existsSync(authModuleTemplate)) {
+    fs.ensureDirSync(path.join(srcPath, 'modules', 'auth'))
+    fs.copySync(authModuleTemplate, path.join(srcPath, 'modules', 'auth'), { overwrite: false })
+  }
+
+  // Copy auth pages
+  const authPagesTemplate = path.join(templateDir, 'app', 'auth')
+  if (fs.existsSync(authPagesTemplate)) {
+    fs.ensureDirSync(path.join(appPath, 'auth'))
+    fs.copySync(authPagesTemplate, path.join(appPath, 'auth'), { overwrite: false })
+  }
+
+  // Copy dashboard module
+  const dashboardModuleTemplate = path.join(templateDir, 'src', 'modules', 'dashboard')
+  if (fs.existsSync(dashboardModuleTemplate)) {
+    fs.ensureDirSync(path.join(srcPath, 'modules', 'dashboard'))
+    fs.copySync(dashboardModuleTemplate, path.join(srcPath, 'modules', 'dashboard'), { overwrite: false })
+  }
+
+  // Copy template reference guide
+  const refGuideTemplate = path.join(path.dirname(__dirname), 'templates', 'TEMPLATE_REFERENCE.md')
+  if (fs.existsSync(refGuideTemplate)) {
+    fs.copySync(refGuideTemplate, path.join(projectPath, 'TEMPLATE_REFERENCE.md'), { overwrite: false })
+  }
+
+  console.log(chalk.green('✓ Module templates copied'))
 }
 
 async function setupModularStructure(projectPath: string, modules: string[]) {
