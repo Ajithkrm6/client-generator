@@ -57,10 +57,19 @@ export const PHASE2_QUESTIONS = [
     name: 'styling',
     message: 'Styling approach?',
     choices: [
-      { name: 'Tailwind CSS + shadcn/ui (recommended)', value: 'tailwind' },
-      { name: 'CSS Modules', value: 'css-modules' }
+      { name: 'Tailwind CSS (utility-first)', value: 'tailwind' },
+      { name: 'CSS Modules (scoped styles)', value: 'css-modules' }
     ],
     default: 'tailwind'
+  },
+
+  // === UI COMPONENTS ===
+  {
+    type: 'confirm',
+    name: 'useShadcnUI',
+    message: 'Use shadcn/ui component library? (includes pre-built accessible components)',
+    when: (answers: any) => answers.styling === 'tailwind',
+    default: true
   },
 
   // === STATE MANAGEMENT ===

@@ -12,6 +12,7 @@ interface ProjectConfig {
   architecture: 'modular' | 'flat'
   sampleModules?: string[]
   styling: string
+  useShadcnUI?: boolean
   stateManagement: string
   dataFetching: string
   includeStorybook: boolean
@@ -150,6 +151,7 @@ export async function createProject(appName: string) {
       architecture: phase2Answers.architecture,
       sampleModules: phase2Answers.sampleModules || [],
       styling: phase2Answers.styling,
+      useShadcnUI: phase2Answers.useShadcnUI ?? false,
       stateManagement: phase2Answers.stateManagement,
       dataFetching: phase2Answers.dataFetching,
       includeStorybook: phase2Answers.includeStorybook,
@@ -239,40 +241,45 @@ async function setupComponentStructure(projectPath: string, config: ProjectConfi
 
 /**
  * Copy reference template files to generated project
- * Includes layout components, welcome page, and examples
+ * Conditionally uses shadcn/ui or Tailwind-only layouts based on useShadcnUI
  */
 async function copyReferenceTemplates(projectPath: string, config: ProjectConfig) {
   if (config.framework !== 'nextjs') {
     return // Only for Next.js for now
   }
 
-  const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
+  const baseTemplateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
+  
+  // Determine which layout variant to use
+  const layoutVariant = config.useShadcnUI ? 'shadcn' : 'tailwind'
+  const layoutTemplateDir = path.join(baseTemplateDir, 'components', 'layout', layoutVariant)
+  
   const srcPath = path.join(projectPath, 'src')
   const appPath = path.join(projectPath, 'app')
 
-  // Copy layout components
-  const layoutTemplateDir = path.join(templateDir, 'components', 'layout')
+  // Copy layout components (shadcn or tailwind variant)
   const layoutDestDir = path.join(srcPath, 'components', 'layout')
   
   if (fs.existsSync(layoutTemplateDir)) {
     fs.copySync(layoutTemplateDir, layoutDestDir, { overwrite: true })
+    console.log(chalk.green(`✓ Layout components (${layoutVariant} variant) copied`))
   }
 
   // Copy welcome page
-  const pageTemplate = path.join(templateDir, 'app', 'page.tsx')
+  const pageTemplate = path.join(baseTemplateDir, 'app', 'page.tsx')
   if (fs.existsSync(pageTemplate)) {
     fs.copySync(pageTemplate, path.join(appPath, 'page.tsx'), { overwrite: false })
   }
 
   // Copy dashboard example
-  const dashboardTemplate = path.join(templateDir, 'app', 'dashboard')
+  const dashboardTemplate = path.join(baseTemplateDir, 'app', 'dashboard')
   if (fs.existsSync(dashboardTemplate)) {
     fs.ensureDirSync(path.join(appPath, 'dashboard'))
     fs.copySync(dashboardTemplate, path.join(appPath, 'dashboard'), { overwrite: false })
   }
 
   // Copy feature-gate library
-  const featureGateTemplate = path.join(templateDir, 'src', 'lib', 'feature-gate.tsx')
+  const featureGateTemplate = path.join(baseTemplateDir, 'src', 'lib', 'feature-gate.tsx')
   if (fs.existsSync(featureGateTemplate)) {
     fs.ensureDirSync(path.join(srcPath, 'lib'))
     fs.copySync(featureGateTemplate, path.join(srcPath, 'lib', 'feature-gate.tsx'), { overwrite: false })
