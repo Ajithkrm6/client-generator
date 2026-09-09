@@ -116,10 +116,10 @@ export async function createProject(appName: string) {
 
     if (framework === 'nextjs') {
       // Use create-next-app with minimal setup and force pnpm package manager
-      // Uses src/app structure for modern Next.js best practices
+      // Uses app/ folder at root with app/src/ for Client-Generator opinionated structure
       try {
         execSync(
-          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --use-pnpm --import-alias "@/*" --src-dir`,
+          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --use-pnpm --import-alias "@/src/*"`,
           { cwd: currentDir, stdio: 'inherit' }
         )
       } catch (error) {
@@ -151,6 +151,34 @@ export async function createProject(appName: string) {
     const workspacePath = path.join(projectPath, 'pnpm-workspace.yaml')
     if (fs.existsSync(workspacePath)) {
       fs.removeSync(workspacePath)
+    }
+
+    // Restructure for app/src/ organization (Client-Generator opinionated structure)
+    if (framework === 'nextjs') {
+      const appSrcPath = path.join(projectPath, 'app', 'src')
+      const tsconfigPath = path.join(projectPath, 'tsconfig.json')
+      
+      // Create app/src/ directory structure
+      fs.ensureDirSync(appSrcPath)
+      const srcSubdirs = ['components', 'lib', 'modules', 'hooks', 'config', 'types', 'stores']
+      for (const dir of srcSubdirs) {
+        fs.ensureDirSync(path.join(appSrcPath, dir))
+      }
+      
+      // Create ui components subdirectory
+      fs.ensureDirSync(path.join(appSrcPath, 'components', 'ui'))
+      
+      // Update tsconfig.json to use correct path alias
+      if (fs.existsSync(tsconfigPath)) {
+        const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'))
+        if (tsconfig.compilerOptions && tsconfig.compilerOptions.paths) {
+          // Update paths to point to app/src/
+          tsconfig.compilerOptions.paths = {
+            '@/*': ['app/src/*']
+          }
+        }
+        fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2))
+      }
     }
 
     console.log(chalk.green(`✓ ${framework.toUpperCase()} project created (pnpm-only)\n`))
@@ -236,7 +264,10 @@ export async function createProject(appName: string) {
 // ========================================
 
 async function setupComponentStructure(projectPath: string, config: ProjectConfig) {
-  const srcPath = path.join(projectPath, 'src')
+  // Use app/src/ for Next.js, regular src/ for Vite
+  const srcPath = config.framework === 'nextjs' 
+    ? path.join(projectPath, 'app', 'src')
+    : path.join(projectPath, 'src')
   
   // Create component directories
   const dirs = [
@@ -272,8 +303,9 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
   const layoutVariant = config.useShadcnUI ? 'shadcn' : 'tailwind'
   const layoutTemplateDir = path.join(baseTemplateDir, 'components', 'layout', layoutVariant)
   
-  const srcPath = path.join(projectPath, 'src')
-  const appPath = path.join(srcPath, 'app')
+  // Use app/src/ structure for Client-Generator
+  const appPath = path.join(projectPath, 'app')
+  const srcPath = path.join(appPath, 'src')
 
   // Copy layout components (shadcn or tailwind variant)
   const layoutDestDir = path.join(srcPath, 'components', 'layout')
@@ -317,8 +349,9 @@ async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
   }
 
   const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
-  const srcPath = path.join(projectPath, 'src')
-  const appPath = path.join(srcPath, 'app')
+  // Use app/src/ structure for Client-Generator
+  const appPath = path.join(projectPath, 'app')
+  const srcPath = path.join(appPath, 'src')
 
   // Copy auth module
   const authModuleTemplate = path.join(templateDir, 'src', 'modules', 'auth')
@@ -351,7 +384,8 @@ async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
 }
 
 async function setupModularStructure(projectPath: string, modules: string[]) {
-  const modulesPath = path.join(projectPath, 'src', 'modules')
+  // Use app/src/ structure for Client-Generator (Next.js only)
+  const modulesPath = path.join(projectPath, 'app', 'src', 'modules')
   
   for (const module of modules) {
     const modulePath = path.join(modulesPath, module)
