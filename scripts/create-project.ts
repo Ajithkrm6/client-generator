@@ -3,7 +3,12 @@ import chalk from 'chalk'
 import fs from 'fs-extra'
 import path from 'path'
 import { execSync } from 'child_process'
+import { fileURLToPath } from 'url'
 import { PHASE1_QUESTIONS, PHASE2_QUESTIONS } from './questionnaire.config.js'
+
+// ES Module workaround for __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 interface ProjectConfig {
   projectName: string
@@ -110,20 +115,20 @@ export async function createProject(appName: string) {
     const currentDir = process.cwd()
 
     if (framework === 'nextjs') {
-      // Use create-next-app with minimal setup
+      // Use create-next-app with minimal setup and force pnpm package manager
       try {
         execSync(
-          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --import-alias "@/*" --no-src-dir`,
+          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --use-pnpm --import-alias "@/*" --no-src-dir`,
           { cwd: currentDir, stdio: 'inherit' }
         )
       } catch (error) {
         console.log(chalk.yellow('Trying alternative Next.js setup...\n'))
-        execSync(`npx create-next-app@latest ${appName} --typescript`, { cwd: currentDir, stdio: 'inherit' })
+        execSync(`npx create-next-app@latest ${appName} --typescript --use-pnpm`, { cwd: currentDir, stdio: 'inherit' })
       }
     } else if (framework === 'vite') {
       // Use create-vite
       try {
-        execSync(`npm create vite@latest ${appName} -- --template react-ts`, { cwd: currentDir, stdio: 'inherit' })
+        execSync(`pnpm create vite@latest ${appName} -- --template react-ts`, { cwd: currentDir, stdio: 'inherit' })
       } catch (error) {
         console.log(chalk.yellow('Trying alternative Vite setup...\n'))
         execSync(`pnpm create vite@latest ${appName} --template react-ts`, { cwd: currentDir, stdio: 'inherit' })
@@ -135,7 +140,13 @@ export async function createProject(appName: string) {
       throw new Error(`Framework CLI did not create project directory`)
     }
 
-    console.log(chalk.green(`✓ ${framework.toUpperCase()} project created\n`))
+    // Clean up npm artifacts if they exist (force pnpm-only)
+    const packageLockPath = path.join(projectPath, 'package-lock.json')
+    if (fs.existsSync(packageLockPath)) {
+      fs.removeSync(packageLockPath)
+    }
+
+    console.log(chalk.green(`✓ ${framework.toUpperCase()} project created (pnpm-only)\n`))
 
     // ========================================
     // PHASE 2: Enhancement Questions
@@ -265,10 +276,11 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
     console.log(chalk.green(`✓ Layout components (${layoutVariant} variant) copied`))
   }
 
-  // Copy welcome page
+  // Copy welcome page (override default Next.js page with professional landing page)
   const pageTemplate = path.join(baseTemplateDir, 'app', 'page.tsx')
   if (fs.existsSync(pageTemplate)) {
-    fs.copySync(pageTemplate, path.join(appPath, 'page.tsx'), { overwrite: false })
+    fs.copySync(pageTemplate, path.join(appPath, 'page.tsx'), { overwrite: true })
+    console.log(chalk.green('✓ Professional landing page configured'))
   }
 
   // Copy dashboard example
@@ -679,6 +691,46 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
   }
 
   console.log(chalk.green('  ✓ Dependencies installed'))
+
+  // Initialize shadcn/ui if selected
+  if (config.useShadcnUI && config.framework === 'nextjs') {
+    console.log(chalk.gray('  Setting up shadcn/ui components...'))
+    try {
+      // Initialize shadcn
+      execSync('npx shadcn-ui@latest init -y', {
+        cwd: projectPath,
+        stdio: 'inherit'
+      })
+
+      // Add common components
+      const commonComponents = [
+        'button',
+        'card',
+        'badge',
+        'input',
+        'form',
+        'dropdown-menu',
+        'dialog',
+        'avatar',
+        'toast'
+      ]
+
+      for (const component of commonComponents) {
+        try {
+          execSync(`npx shadcn-ui@latest add ${component} -y`, {
+            cwd: projectPath,
+            stdio: 'inherit'
+          })
+        } catch (error) {
+          console.log(chalk.yellow(`  ⚠️  Failed to add ${component} component`))
+        }
+      }
+
+      console.log(chalk.green('  ✓ shadcn/ui initialized with common components'))
+    } catch (error) {
+      console.log(chalk.yellow('  ⚠️  shadcn/ui setup failed - you can run manually: npx shadcn-ui@latest init'))
+    }
+  }
 }
 
 async function setupHusky(projectPath: string) {

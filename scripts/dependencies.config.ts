@@ -24,6 +24,9 @@ export const DEPENDENCIES = {
       'react': '19.2.8',
       'react-dom': '19.2.8'
     },
+    shadcn: {
+      'shadcn-ui': 'latest'
+    },
     storybook: {
       '@storybook/nextjs': '10.6.0',
       '@storybook/react': '10.6.0',
@@ -37,7 +40,8 @@ export const DEPENDENCIES = {
       'eslint': '10.10.0',
       'eslint-config-next': '14.2.3',
       'prettier': '3.9.6',
-      'storybook': '^7.6.0'
+      'storybook': '^7.6.0',
+      'lint-staged': '15.2.2'
     }
   },
 
