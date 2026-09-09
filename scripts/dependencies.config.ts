@@ -25,7 +25,8 @@ export const DEPENDENCIES = {
       'react-dom': '19.2.8'
     },
     shadcn: {
-      'shadcn-ui': 'latest'
+      'shadcn-ui': 'latest',
+      'lucide-react': '0.408.0'
     },
     storybook: {
       '@storybook/nextjs': '10.6.0',

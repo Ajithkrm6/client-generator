@@ -116,9 +116,10 @@ export async function createProject(appName: string) {
 
     if (framework === 'nextjs') {
       // Use create-next-app with minimal setup and force pnpm package manager
+      // Uses src/app structure for modern Next.js best practices
       try {
         execSync(
-          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --use-pnpm --import-alias "@/*" --no-src-dir`,
+          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --use-pnpm --import-alias "@/*" --src-dir`,
           { cwd: currentDir, stdio: 'inherit' }
         )
       } catch (error) {
@@ -144,6 +145,12 @@ export async function createProject(appName: string) {
     const packageLockPath = path.join(projectPath, 'package-lock.json')
     if (fs.existsSync(packageLockPath)) {
       fs.removeSync(packageLockPath)
+    }
+
+    // Remove pnpm-workspace.yaml for single projects (monorepo only)
+    const workspacePath = path.join(projectPath, 'pnpm-workspace.yaml')
+    if (fs.existsSync(workspacePath)) {
+      fs.removeSync(workspacePath)
     }
 
     console.log(chalk.green(`✓ ${framework.toUpperCase()} project created (pnpm-only)\n`))
@@ -266,7 +273,7 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
   const layoutTemplateDir = path.join(baseTemplateDir, 'components', 'layout', layoutVariant)
   
   const srcPath = path.join(projectPath, 'src')
-  const appPath = path.join(projectPath, 'app')
+  const appPath = path.join(srcPath, 'app')
 
   // Copy layout components (shadcn or tailwind variant)
   const layoutDestDir = path.join(srcPath, 'components', 'layout')
@@ -311,7 +318,7 @@ async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
 
   const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
   const srcPath = path.join(projectPath, 'src')
-  const appPath = path.join(projectPath, 'app')
+  const appPath = path.join(srcPath, 'app')
 
   // Copy auth module
   const authModuleTemplate = path.join(templateDir, 'src', 'modules', 'auth')
