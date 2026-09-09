@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, GithubIcon, ExternalLink, Zap, ChevronDown } from 'lucide-react'
+import { ArrowRight, Code, ExternalLink, Zap, ChevronDown } from 'lucide-react'
 import { getVersion, getPackageInfo } from '@/lib/version'
 
 export default function WelcomePage() {

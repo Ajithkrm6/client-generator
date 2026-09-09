@@ -794,7 +794,8 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
         'dropdown-menu',
         'dialog',
         'avatar',
-        'toast'
+        'toast',
+        'collapsible'  // Required for SideNav and other collapsible UI
       ]
 
       for (const component of commonComponents) {
