@@ -243,10 +243,13 @@ export async function createProject(appName: string) {
     // 6. Setup stores
     await setupStores(projectPath, config)
 
-    // 7. Setup API client
+    // 7. Setup lib utilities (version.ts, etc.)
+    await setupLibUtils(projectPath)
+
+    // 8. Setup API client
     await setupApiClient(projectPath, config.backendUrl)
 
-    // 8. Setup environment files
+    // 9. Setup environment files
     await setupEnvFiles(projectPath, config.backendUrl)
 
     // Setup Husky if selected
@@ -602,6 +605,35 @@ export const useGlobalStore = create<GlobalState>()(
   console.log(chalk.green('✓ Global store created (with Zustand + Immer)'))
 }
 
+async function setupLibUtils(projectPath: string) {
+  const libPath = path.join(projectPath, 'src', 'lib')
+  
+  // Create version.ts - used by auth pages and components
+  const versionContent = `/**
+ * Application Version Information
+ * 
+ * Provides version info for displaying in UI
+ */
+
+const packageJson = require('../../../package.json')
+
+export function getVersion(): string {
+  return packageJson.version
+}
+
+export function getPackageInfo() {
+  return {
+    name: packageJson.name,
+    version: packageJson.version,
+    description: packageJson.description
+  }
+}
+`
+  
+  fs.writeFileSync(path.join(libPath, 'version.ts'), versionContent)
+  console.log(chalk.green('✓ Version utilities created'))
+}
+
 async function setupApiClient(projectPath: string, backendUrl: string) {
   const apiClientPath = path.join(projectPath, 'src', 'lib', 'api-client.ts')
   
@@ -706,7 +738,8 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
     'react-hook-form',
     'zod',
     '@hookform/resolvers',
-    'axios'
+    'axios',
+    'lucide-react'  // Required for icons in landing page and components
   )
 
   // Styling
@@ -746,8 +779,8 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
   if (config.useShadcnUI && config.framework === 'nextjs') {
     console.log(chalk.gray('  Setting up shadcn/ui components...'))
     try {
-      // Initialize shadcn
-      execSync('npx shadcn-ui@latest init -y', {
+      // Initialize shadcn with --cwd to ensure it runs in project directory
+      execSync('npx shadcn-ui@latest init -y --cwd .', {
         cwd: projectPath,
         stdio: 'inherit'
       })
@@ -767,7 +800,7 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
 
       for (const component of commonComponents) {
         try {
-          execSync(`npx shadcn-ui@latest add ${component} -y`, {
+          execSync(`npx shadcn-ui@latest add ${component} -y --cwd .`, {
             cwd: projectPath,
             stdio: 'inherit'
           })
