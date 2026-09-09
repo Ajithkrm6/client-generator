@@ -1,9 +1,9 @@
 /**
  * Version utility
- * Dynamically reads version from package.json
+ * Dynamically reads version from project's package.json at root
  */
 
-import packageJson from '../../../../package.json'
+import packageJson from '../../package.json'
 
 export const getVersion = () => {
   return packageJson.version || '1.0.0'

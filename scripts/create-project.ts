@@ -607,29 +607,38 @@ export const useGlobalStore = create<GlobalState>()(
 
 async function setupLibUtils(projectPath: string) {
   const libPath = path.join(projectPath, 'src', 'lib')
+  const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
   
-  // Create version.ts - used by auth pages and components
-  const versionContent = `/**
+  // Copy version.ts template - it reads version from generated project's package.json at root
+  const versionTemplate = path.join(templateDir, 'src', 'lib', 'version.ts')
+  if (fs.existsSync(versionTemplate)) {
+    fs.copySync(versionTemplate, path.join(libPath, 'version.ts'), { overwrite: true })
+  } else {
+    // Fallback: create version.ts if template doesn't exist
+    const versionContent = `/**
  * Application Version Information
  * 
- * Provides version info for displaying in UI
+ * Reads version from package.json at root
  */
 
+import packageJson from '../../package.json'
+
 export function getVersion(): string {
-  return '1.0.0'
+  return packageJson.version || '1.0.0'
 }
 
 export function getPackageInfo() {
   return {
-    name: 'frontend-app',
-    version: '1.0.0',
-    description: 'Built with BS-Frontend-Generator'
+    name: packageJson.name || 'frontend-app',
+    version: packageJson.version || '1.0.0',
+    description: packageJson.description || 'Built with BS-Frontend-Generator'
   }
 }
 `
+    fs.writeFileSync(path.join(libPath, 'version.ts'), versionContent)
+  }
   
-  fs.writeFileSync(path.join(libPath, 'version.ts'), versionContent)
-  console.log(chalk.green('✓ Version utilities created'))
+  console.log(chalk.green('✓ Version utilities created (reads from package.json at root)'))
 }
 
 async function setupApiClient(projectPath: string, backendUrl: string) {
