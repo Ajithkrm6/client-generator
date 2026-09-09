@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Code, ExternalLink, Zap, ChevronDown } from 'lucide-react'
+import { ArrowRight, Github, ExternalLink, Zap, ChevronDown } from 'lucide-react'
 import { getVersion, getPackageInfo } from '@/lib/version'
 
 export default function WelcomePage() {
@@ -592,7 +592,7 @@ npm run type-check # TypeScript validation`}
                       <li>Use feature gates for module toggling</li>
                       <li>Follow existing component patterns</li>
                       <li>Export from barrel files (index.ts)</li>
-                      <li>Use server components by default ('use client' sparingly)</li>
+                      <li>Use server components by default (&quot;use client&quot; sparingly)</li>
                     </ul>
                   </div>
                 )
