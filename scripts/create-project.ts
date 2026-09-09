@@ -615,17 +615,15 @@ async function setupLibUtils(projectPath: string) {
  * Provides version info for displaying in UI
  */
 
-const packageJson = require('../../../package.json')
-
 export function getVersion(): string {
-  return packageJson.version
+  return '1.0.0'
 }
 
 export function getPackageInfo() {
   return {
-    name: packageJson.name,
-    version: packageJson.version,
-    description: packageJson.description
+    name: 'frontend-app',
+    version: '1.0.0',
+    description: 'Built with BS-Frontend-Generator'
   }
 }
 `
@@ -777,10 +775,11 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
 
   // Initialize shadcn/ui if selected
   if (config.useShadcnUI && config.framework === 'nextjs') {
-    console.log(chalk.gray('  Setting up shadcn/ui components...'))
+    console.log(chalk.gray('  Setting up shadcn components...'))
     try {
       // Initialize shadcn with --cwd to ensure it runs in project directory
-      execSync('npx shadcn-ui@latest init -y --cwd .', {
+      // Note: shadcn-ui package is deprecated, use shadcn instead
+      execSync('npx shadcn@latest init -y --cwd .', {
         cwd: projectPath,
         stdio: 'inherit'
       })
@@ -800,7 +799,7 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
 
       for (const component of commonComponents) {
         try {
-          execSync(`npx shadcn-ui@latest add ${component} -y --cwd .`, {
+          execSync(`npx shadcn@latest add ${component} -y --cwd .`, {
             cwd: projectPath,
             stdio: 'inherit'
           })
@@ -809,9 +808,9 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
         }
       }
 
-      console.log(chalk.green('  ✓ shadcn/ui initialized with common components'))
+      console.log(chalk.green('  ✓ shadcn components initialized with common components'))
     } catch (error) {
-      console.log(chalk.yellow('  ⚠️  shadcn/ui setup failed - you can run manually: npx shadcn-ui@latest init'))
+      console.log(chalk.yellow('  ⚠️  shadcn setup failed - you can run manually: npx shadcn@latest init'))
     }
   }
 }
