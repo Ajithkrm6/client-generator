@@ -327,11 +327,28 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
     console.log(chalk.green(`✓ Layout components (${layoutVariant} variant) copied`))
   }
 
+  // Copy layout with favicon setup (override default Next.js layout)
+  const layoutTemplate = path.join(baseTemplateDir, 'app', 'layout.tsx')
+  if (fs.existsSync(layoutTemplate)) {
+    fs.copySync(layoutTemplate, path.join(appPath, 'layout.tsx'), { overwrite: true })
+    console.log(chalk.green('✓ Layout with favicon links configured'))
+  }
+
   // Copy welcome page (override default Next.js page with professional landing page)
   const pageTemplate = path.join(baseTemplateDir, 'app', 'page.tsx')
   if (fs.existsSync(pageTemplate)) {
     fs.copySync(pageTemplate, path.join(appPath, 'page.tsx'), { overwrite: true })
     console.log(chalk.green('✓ Professional landing page configured'))
+  }
+
+  // Copy public assets (favicons, manifest, images)
+  const publicTemplate = path.join(baseTemplateDir, 'public')
+  if (fs.existsSync(publicTemplate)) {
+    const publicDestDir = path.join(projectPath, 'public')
+    fs.ensureDirSync(publicDestDir)
+    // Copy all public assets (favicons, manifest, etc)
+    fs.copySync(publicTemplate, publicDestDir, { overwrite: true })
+    console.log(chalk.green('✓ Public assets (favicons, manifest) configured'))
   }
 
   // Copy dashboard example
