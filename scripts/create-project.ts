@@ -3,7 +3,12 @@ import chalk from 'chalk'
 import fs from 'fs-extra'
 import path from 'path'
 import { execSync } from 'child_process'
+import { fileURLToPath } from 'url'
 import { PHASE1_QUESTIONS, PHASE2_QUESTIONS } from './questionnaire.config.js'
+
+// ES Module workaround for __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 interface ProjectConfig {
   projectName: string
@@ -110,20 +115,21 @@ export async function createProject(appName: string) {
     const currentDir = process.cwd()
 
     if (framework === 'nextjs') {
-      // Use create-next-app with minimal setup
+      // Use create-next-app with minimal setup and force pnpm package manager
+      // Uses app/ folder at root with app/src/ for Client-Generator opinionated structure
       try {
         execSync(
-          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --import-alias "@/*" --no-src-dir`,
+          `npx create-next-app@latest ${appName} --typescript --eslint --tailwind --app --no-git --use-pnpm --import-alias "@/src/*"`,
           { cwd: currentDir, stdio: 'inherit' }
         )
       } catch (error) {
         console.log(chalk.yellow('Trying alternative Next.js setup...\n'))
-        execSync(`npx create-next-app@latest ${appName} --typescript`, { cwd: currentDir, stdio: 'inherit' })
+        execSync(`npx create-next-app@latest ${appName} --typescript --use-pnpm`, { cwd: currentDir, stdio: 'inherit' })
       }
     } else if (framework === 'vite') {
       // Use create-vite
       try {
-        execSync(`npm create vite@latest ${appName} -- --template react-ts`, { cwd: currentDir, stdio: 'inherit' })
+        execSync(`pnpm create vite@latest ${appName} -- --template react-ts`, { cwd: currentDir, stdio: 'inherit' })
       } catch (error) {
         console.log(chalk.yellow('Trying alternative Vite setup...\n'))
         execSync(`pnpm create vite@latest ${appName} --template react-ts`, { cwd: currentDir, stdio: 'inherit' })
@@ -135,7 +141,55 @@ export async function createProject(appName: string) {
       throw new Error(`Framework CLI did not create project directory`)
     }
 
-    console.log(chalk.green(`✓ ${framework.toUpperCase()} project created\n`))
+    // Clean up npm artifacts if they exist (force pnpm-only)
+    const packageLockPath = path.join(projectPath, 'package-lock.json')
+    if (fs.existsSync(packageLockPath)) {
+      fs.removeSync(packageLockPath)
+    }
+
+    // Remove pnpm-workspace.yaml for single projects (monorepo only)
+    const workspacePath = path.join(projectPath, 'pnpm-workspace.yaml')
+    if (fs.existsSync(workspacePath)) {
+      fs.removeSync(workspacePath)
+    }
+
+    // Create src/ directory structure (sibling to app/) for Client-Generator code (Phase 2 additions)
+    if (framework === 'nextjs') {
+      const srcPath = path.join(projectPath, 'src')
+      const tsconfigPath = path.join(projectPath, 'tsconfig.json')
+      
+      // Create src/ and subdirectories at root level (sibling to app/)
+      fs.ensureDirSync(srcPath)
+      const srcSubdirs = ['components', 'lib', 'modules', 'hooks', 'config', 'types', 'stores']
+      for (const dir of srcSubdirs) {
+        fs.ensureDirSync(path.join(srcPath, dir))
+      }
+      
+      // Create ui components subdirectory for shadcn
+      fs.ensureDirSync(path.join(srcPath, 'components', 'ui'))
+      
+      // Update tsconfig paths to point to src/ (enterprise production-ready structure)
+      // This allows imports like @/components, @/modules, etc to work with src/components, src/modules
+      if (fs.existsSync(tsconfigPath)) {
+        try {
+          const tsconfigContent = fs.readFileSync(tsconfigPath, 'utf-8')
+          const tsconfig = JSON.parse(tsconfigContent)
+          if (tsconfig.compilerOptions) {
+            // Update paths to use src/ structure (sibling to app/)
+            tsconfig.compilerOptions.paths = {
+              '@/*': ['src/*']
+            }
+          }
+          fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2))
+        } catch (error) {
+          console.log(chalk.yellow('  ⚠️  Could not update tsconfig paths'))
+        }
+      }
+      
+      console.log(chalk.green('✓ src/ directory structure created (sibling to app/)'))
+    }
+
+    console.log(chalk.green(`✓ ${framework.toUpperCase()} project created (pnpm-only)\n`))
 
     // ========================================
     // PHASE 2: Enhancement Questions
@@ -165,33 +219,38 @@ export async function createProject(appName: string) {
     // ========================================
     console.log(chalk.cyan('\n🔧 Applying enhancements...\n'))
 
-    // Setup component structure and copy reference templates
+    // 1. Setup component structure (creates empty dirs)
     await setupComponentStructure(projectPath, config)
+
+    // 2. Install dependencies FIRST (must populate src/components/ui/ with shadcn before copying layout templates)
+    await setupDependencies(projectPath, config)
+
+    // 3. Copy reference templates AFTER shadcn is installed (layout components depend on shadcn)
     await copyReferenceTemplates(projectPath, config)
 
-    // Setup modular structure (if applicable)
+    // 4. Setup modular structure (if applicable)
     if (config.architecture === 'modular' && config.framework === 'nextjs') {
       await setupModularStructure(projectPath, config.sampleModules || [])
       await setupFeatureGates(projectPath, config.sampleModules || [])
       await copyModuleTemplates(projectPath, config)
     }
 
-    // Setup Storybook
+    // 5. Setup Storybook
     if (config.includeStorybook) {
       await setupStorybook(projectPath, config.framework)
     }
 
-    // Setup stores
+    // 6. Setup stores
     await setupStores(projectPath, config)
 
-    // Setup API client
+    // 7. Setup lib utilities (version.ts, etc.)
+    await setupLibUtils(projectPath)
+
+    // 8. Setup API client
     await setupApiClient(projectPath, config.backendUrl)
 
-    // Setup environment files
+    // 9. Setup environment files
     await setupEnvFiles(projectPath, config.backendUrl)
-
-    // Install additional dependencies based on choices
-    await setupDependencies(projectPath, config)
 
     // Setup Husky if selected
     if (config.husky) {
@@ -218,9 +277,11 @@ export async function createProject(appName: string) {
 // ========================================
 
 async function setupComponentStructure(projectPath: string, config: ProjectConfig) {
+  // For Next.js and Vite: use root-level src/ (enterprise production-ready structure)
+  // src/ is a sibling to app/ for Next.js (app = routes, src = code)
   const srcPath = path.join(projectPath, 'src')
   
-  // Create component directories
+  // Verify directories exist (they should from Phase 1 for Next.js)
   const dirs = [
     'components/ui',
     'components/shared',
@@ -236,7 +297,7 @@ async function setupComponentStructure(projectPath: string, config: ProjectConfi
     fs.ensureDirSync(path.join(srcPath, dir))
   }
   
-  console.log(chalk.green('✓ Component structure created'))
+  console.log(chalk.green('✓ Component structure verified'))
 }
 
 /**
@@ -254,8 +315,9 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
   const layoutVariant = config.useShadcnUI ? 'shadcn' : 'tailwind'
   const layoutTemplateDir = path.join(baseTemplateDir, 'components', 'layout', layoutVariant)
   
-  const srcPath = path.join(projectPath, 'src')
+  // Enterprise structure: app/ (routes) and src/ (code) as siblings
   const appPath = path.join(projectPath, 'app')
+  const srcPath = path.join(projectPath, 'src')
 
   // Copy layout components (shadcn or tailwind variant)
   const layoutDestDir = path.join(srcPath, 'components', 'layout')
@@ -265,10 +327,28 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
     console.log(chalk.green(`✓ Layout components (${layoutVariant} variant) copied`))
   }
 
-  // Copy welcome page
+  // Copy layout with favicon setup (override default Next.js layout)
+  const layoutTemplate = path.join(baseTemplateDir, 'app', 'layout.tsx')
+  if (fs.existsSync(layoutTemplate)) {
+    fs.copySync(layoutTemplate, path.join(appPath, 'layout.tsx'), { overwrite: true })
+    console.log(chalk.green('✓ Layout with favicon links configured'))
+  }
+
+  // Copy welcome page (override default Next.js page with professional landing page)
   const pageTemplate = path.join(baseTemplateDir, 'app', 'page.tsx')
   if (fs.existsSync(pageTemplate)) {
-    fs.copySync(pageTemplate, path.join(appPath, 'page.tsx'), { overwrite: false })
+    fs.copySync(pageTemplate, path.join(appPath, 'page.tsx'), { overwrite: true })
+    console.log(chalk.green('✓ Professional landing page configured'))
+  }
+
+  // Copy public assets (favicons, manifest, images)
+  const publicTemplate = path.join(baseTemplateDir, 'public')
+  if (fs.existsSync(publicTemplate)) {
+    const publicDestDir = path.join(projectPath, 'public')
+    fs.ensureDirSync(publicDestDir)
+    // Copy all public assets (favicons, manifest, etc)
+    fs.copySync(publicTemplate, publicDestDir, { overwrite: true })
+    console.log(chalk.green('✓ Public assets (favicons, manifest) configured'))
   }
 
   // Copy dashboard example
@@ -298,8 +378,9 @@ async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
   }
 
   const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
-  const srcPath = path.join(projectPath, 'src')
+  // Enterprise structure: app/ (routes) and src/ (code) as siblings
   const appPath = path.join(projectPath, 'app')
+  const srcPath = path.join(projectPath, 'src')
 
   // Copy auth module
   const authModuleTemplate = path.join(templateDir, 'src', 'modules', 'auth')
@@ -332,6 +413,7 @@ async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
 }
 
 async function setupModularStructure(projectPath: string, modules: string[]) {
+  // Enterprise structure: modules at src/modules (sibling to app/)
   const modulesPath = path.join(projectPath, 'src', 'modules')
   
   for (const module of modules) {
@@ -540,6 +622,42 @@ export const useGlobalStore = create<GlobalState>()(
   console.log(chalk.green('✓ Global store created (with Zustand + Immer)'))
 }
 
+async function setupLibUtils(projectPath: string) {
+  const libPath = path.join(projectPath, 'src', 'lib')
+  const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
+  
+  // Copy version.ts template - it reads version from generated project's package.json at root
+  const versionTemplate = path.join(templateDir, 'src', 'lib', 'version.ts')
+  if (fs.existsSync(versionTemplate)) {
+    fs.copySync(versionTemplate, path.join(libPath, 'version.ts'), { overwrite: true })
+  } else {
+    // Fallback: create version.ts if template doesn't exist
+    const versionContent = `/**
+ * Application Version Information
+ * 
+ * Reads version from package.json at root
+ */
+
+import packageJson from '../../package.json'
+
+export function getVersion(): string {
+  return packageJson.version || '1.0.0'
+}
+
+export function getPackageInfo() {
+  return {
+    name: packageJson.name || 'frontend-app',
+    version: packageJson.version || '1.0.0',
+    description: packageJson.description || 'Built with BS-Frontend-Generator'
+  }
+}
+`
+    fs.writeFileSync(path.join(libPath, 'version.ts'), versionContent)
+  }
+  
+  console.log(chalk.green('✓ Version utilities created (reads from package.json at root)'))
+}
+
 async function setupApiClient(projectPath: string, backendUrl: string) {
   const apiClientPath = path.join(projectPath, 'src', 'lib', 'api-client.ts')
   
@@ -644,7 +762,8 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
     'react-hook-form',
     'zod',
     '@hookform/resolvers',
-    'axios'
+    'axios',
+    'lucide-react'  // Required for icons in landing page and components
   )
 
   // Styling
@@ -679,6 +798,48 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
   }
 
   console.log(chalk.green('  ✓ Dependencies installed'))
+
+  // Initialize shadcn/ui if selected
+  if (config.useShadcnUI && config.framework === 'nextjs') {
+    console.log(chalk.gray('  Setting up shadcn components...'))
+    try {
+      // Initialize shadcn with --cwd to ensure it runs in project directory
+      // Note: shadcn-ui package is deprecated, use shadcn instead
+      execSync('npx shadcn@latest init -y --cwd .', {
+        cwd: projectPath,
+        stdio: 'inherit'
+      })
+
+      // Add common components
+      const commonComponents = [
+        'button',
+        'card',
+        'badge',
+        'input',
+        'form',
+        'dropdown-menu',
+        'dialog',
+        'avatar',
+        'toast',
+        'collapsible'  // Required for SideNav and other collapsible UI
+      ]
+
+      for (const component of commonComponents) {
+        try {
+          execSync(`npx shadcn@latest add ${component} -y --cwd .`, {
+            cwd: projectPath,
+            stdio: 'inherit'
+          })
+        } catch (error) {
+          console.log(chalk.yellow(`  ⚠️  Failed to add ${component} component`))
+        }
+      }
+
+      console.log(chalk.green('  ✓ shadcn components initialized with common components'))
+    } catch (error) {
+      console.log(chalk.yellow('  ⚠️  shadcn setup failed - you can run manually: npx shadcn@latest init'))
+    }
+  }
 }
 
 async function setupHusky(projectPath: string) {
