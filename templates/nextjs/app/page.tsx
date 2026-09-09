@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Github, ExternalLink, Zap, ChevronDown } from 'lucide-react'
+import { ArrowRight, ExternalLink, Zap, ChevronDown } from 'lucide-react'
 import { getVersion, getPackageInfo } from '@/lib/version'
 
 export default function WelcomePage() {
@@ -35,9 +35,8 @@ export default function WelcomePage() {
       }}>
         <div style={{
           maxWidth: '800px',
-          textAlign: 'center'
-        }}>
-          {/* Logo Section */}
+          textAlign: 'center'}}
+>          {/* Logo Section */}
           <div style={{
             marginBottom: '32px',
             display: 'flex',
@@ -885,8 +884,16 @@ npm run type-check # TypeScript validation`}
               gap: '16px'
             }}
           >
-            <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex' }}>
-              <Github size={20} />
+            <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+              <img
+                src="/github.png"
+                alt="Github Logo"
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  objectFit: 'contain'
+                }}
+              />
             </a>
             <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex' }}>
               <ExternalLink size={20} />
