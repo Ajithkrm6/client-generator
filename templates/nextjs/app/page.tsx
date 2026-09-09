@@ -94,6 +94,54 @@ export default function WelcomePage() {
             </span>
           </h1>
 
+          {/* Developer Credit */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '32px'
+          }}>
+            <p style={{
+              fontSize: '0.95rem',
+              color: '#60a5fa',
+              fontWeight: '500',
+              letterSpacing: '0.5px',
+              margin: 0
+            }}>
+              Developed by Ajith Kumar
+            </p>
+            <a
+              href="https://github.com/Ajithkrm6"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '20px',
+                height: '20px',
+                transition: 'transform 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.2)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)'
+              }}
+            >
+              <img
+                src="/github.png"
+                alt="GitHub Profile"
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  objectFit: 'contain'
+                }}
+              />
+            </a>
+          </div>
+
           {/* Description */}
           <p style={{
             fontSize: '1.1rem',
