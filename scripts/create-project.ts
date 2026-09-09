@@ -219,33 +219,35 @@ export async function createProject(appName: string) {
     // ========================================
     console.log(chalk.cyan('\n🔧 Applying enhancements...\n'))
 
-    // Setup component structure and copy reference templates
+    // 1. Setup component structure (creates empty dirs)
     await setupComponentStructure(projectPath, config)
+
+    // 2. Install dependencies FIRST (must populate src/components/ui/ with shadcn before copying layout templates)
+    await setupDependencies(projectPath, config)
+
+    // 3. Copy reference templates AFTER shadcn is installed (layout components depend on shadcn)
     await copyReferenceTemplates(projectPath, config)
 
-    // Setup modular structure (if applicable)
+    // 4. Setup modular structure (if applicable)
     if (config.architecture === 'modular' && config.framework === 'nextjs') {
       await setupModularStructure(projectPath, config.sampleModules || [])
       await setupFeatureGates(projectPath, config.sampleModules || [])
       await copyModuleTemplates(projectPath, config)
     }
 
-    // Setup Storybook
+    // 5. Setup Storybook
     if (config.includeStorybook) {
       await setupStorybook(projectPath, config.framework)
     }
 
-    // Setup stores
+    // 6. Setup stores
     await setupStores(projectPath, config)
 
-    // Setup API client
+    // 7. Setup API client
     await setupApiClient(projectPath, config.backendUrl)
 
-    // Setup environment files
+    // 8. Setup environment files
     await setupEnvFiles(projectPath, config.backendUrl)
-
-    // Install additional dependencies based on choices
-    await setupDependencies(projectPath, config)
 
     // Setup Husky if selected
     if (config.husky) {
