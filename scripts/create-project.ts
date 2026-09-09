@@ -153,32 +153,40 @@ export async function createProject(appName: string) {
       fs.removeSync(workspacePath)
     }
 
-    // Restructure for app/src/ organization (Client-Generator opinionated structure)
+    // Create app/src/ directory structure for Client-Generator code (Phase 2 additions)
     if (framework === 'nextjs') {
       const appSrcPath = path.join(projectPath, 'app', 'src')
       const tsconfigPath = path.join(projectPath, 'tsconfig.json')
       
-      // Create app/src/ directory structure
+      // Create app/src/ and subdirectories
       fs.ensureDirSync(appSrcPath)
       const srcSubdirs = ['components', 'lib', 'modules', 'hooks', 'config', 'types', 'stores']
       for (const dir of srcSubdirs) {
         fs.ensureDirSync(path.join(appSrcPath, dir))
       }
       
-      // Create ui components subdirectory
+      // Create ui components subdirectory for shadcn
       fs.ensureDirSync(path.join(appSrcPath, 'components', 'ui'))
       
-      // Update tsconfig.json to use correct path alias
+      // Update tsconfig paths to point to app/src/ (Client-Generator structure)
+      // This allows imports like @/src/components/ui to work with app/src/components/ui
       if (fs.existsSync(tsconfigPath)) {
-        const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'))
-        if (tsconfig.compilerOptions && tsconfig.compilerOptions.paths) {
-          // Update paths to point to app/src/
-          tsconfig.compilerOptions.paths = {
-            '@/*': ['app/src/*']
+        try {
+          const tsconfigContent = fs.readFileSync(tsconfigPath, 'utf-8')
+          const tsconfig = JSON.parse(tsconfigContent)
+          if (tsconfig.compilerOptions) {
+            // Update paths to use app/src/ structure
+            tsconfig.compilerOptions.paths = {
+              '@/*': ['app/src/*']
+            }
           }
+          fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2))
+        } catch (error) {
+          console.log(chalk.yellow('  ⚠️  Could not update tsconfig paths'))
         }
-        fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2))
       }
+      
+      console.log(chalk.green('✓ app/src/ directory structure created'))
     }
 
     console.log(chalk.green(`✓ ${framework.toUpperCase()} project created (pnpm-only)\n`))
@@ -264,12 +272,13 @@ export async function createProject(appName: string) {
 // ========================================
 
 async function setupComponentStructure(projectPath: string, config: ProjectConfig) {
-  // Use app/src/ for Next.js, regular src/ for Vite
+  // For Next.js: use app/src/ that was created in Phase 1
+  // For Vite: use root-level src/
   const srcPath = config.framework === 'nextjs' 
     ? path.join(projectPath, 'app', 'src')
     : path.join(projectPath, 'src')
   
-  // Create component directories
+  // Verify directories exist (they should from Phase 1 for Next.js)
   const dirs = [
     'components/ui',
     'components/shared',
@@ -285,7 +294,7 @@ async function setupComponentStructure(projectPath: string, config: ProjectConfi
     fs.ensureDirSync(path.join(srcPath, dir))
   }
   
-  console.log(chalk.green('✓ Component structure created'))
+  console.log(chalk.green('✓ Component structure verified'))
 }
 
 /**
