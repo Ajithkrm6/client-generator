@@ -37,6 +37,25 @@ export default function WelcomePage() {
           maxWidth: '800px',
           textAlign: 'center'
         }}>
+          {/* Logo Section */}
+          <div style={{
+            marginBottom: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px'
+          }}>
+            <img
+              src="/github.png"
+              alt="Client Generator Logo"
+              style={{
+                width: '64px',
+                height: '64px',
+                objectFit: 'contain'
+              }}
+            />
+          </div>
+
           {/* Badge */}
           <div style={{
             display: 'inline-flex',
