@@ -153,31 +153,31 @@ export async function createProject(appName: string) {
       fs.removeSync(workspacePath)
     }
 
-    // Create app/src/ directory structure for Client-Generator code (Phase 2 additions)
+    // Create src/ directory structure (sibling to app/) for Client-Generator code (Phase 2 additions)
     if (framework === 'nextjs') {
-      const appSrcPath = path.join(projectPath, 'app', 'src')
+      const srcPath = path.join(projectPath, 'src')
       const tsconfigPath = path.join(projectPath, 'tsconfig.json')
       
-      // Create app/src/ and subdirectories
-      fs.ensureDirSync(appSrcPath)
+      // Create src/ and subdirectories at root level (sibling to app/)
+      fs.ensureDirSync(srcPath)
       const srcSubdirs = ['components', 'lib', 'modules', 'hooks', 'config', 'types', 'stores']
       for (const dir of srcSubdirs) {
-        fs.ensureDirSync(path.join(appSrcPath, dir))
+        fs.ensureDirSync(path.join(srcPath, dir))
       }
       
       // Create ui components subdirectory for shadcn
-      fs.ensureDirSync(path.join(appSrcPath, 'components', 'ui'))
+      fs.ensureDirSync(path.join(srcPath, 'components', 'ui'))
       
-      // Update tsconfig paths to point to app/src/ (Client-Generator structure)
-      // This allows imports like @/src/components/ui to work with app/src/components/ui
+      // Update tsconfig paths to point to src/ (enterprise production-ready structure)
+      // This allows imports like @/components, @/modules, etc to work with src/components, src/modules
       if (fs.existsSync(tsconfigPath)) {
         try {
           const tsconfigContent = fs.readFileSync(tsconfigPath, 'utf-8')
           const tsconfig = JSON.parse(tsconfigContent)
           if (tsconfig.compilerOptions) {
-            // Update paths to use app/src/ structure
+            // Update paths to use src/ structure (sibling to app/)
             tsconfig.compilerOptions.paths = {
-              '@/*': ['app/src/*']
+              '@/*': ['src/*']
             }
           }
           fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2))
@@ -186,7 +186,7 @@ export async function createProject(appName: string) {
         }
       }
       
-      console.log(chalk.green('✓ app/src/ directory structure created'))
+      console.log(chalk.green('✓ src/ directory structure created (sibling to app/)'))
     }
 
     console.log(chalk.green(`✓ ${framework.toUpperCase()} project created (pnpm-only)\n`))
@@ -272,11 +272,9 @@ export async function createProject(appName: string) {
 // ========================================
 
 async function setupComponentStructure(projectPath: string, config: ProjectConfig) {
-  // For Next.js: use app/src/ that was created in Phase 1
-  // For Vite: use root-level src/
-  const srcPath = config.framework === 'nextjs' 
-    ? path.join(projectPath, 'app', 'src')
-    : path.join(projectPath, 'src')
+  // For Next.js and Vite: use root-level src/ (enterprise production-ready structure)
+  // src/ is a sibling to app/ for Next.js (app = routes, src = code)
+  const srcPath = path.join(projectPath, 'src')
   
   // Verify directories exist (they should from Phase 1 for Next.js)
   const dirs = [
@@ -312,9 +310,9 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
   const layoutVariant = config.useShadcnUI ? 'shadcn' : 'tailwind'
   const layoutTemplateDir = path.join(baseTemplateDir, 'components', 'layout', layoutVariant)
   
-  // Use app/src/ structure for Client-Generator
+  // Enterprise structure: app/ (routes) and src/ (code) as siblings
   const appPath = path.join(projectPath, 'app')
-  const srcPath = path.join(appPath, 'src')
+  const srcPath = path.join(projectPath, 'src')
 
   // Copy layout components (shadcn or tailwind variant)
   const layoutDestDir = path.join(srcPath, 'components', 'layout')
@@ -358,9 +356,9 @@ async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
   }
 
   const templateDir = path.join(path.dirname(__dirname), 'templates', 'nextjs')
-  // Use app/src/ structure for Client-Generator
+  // Enterprise structure: app/ (routes) and src/ (code) as siblings
   const appPath = path.join(projectPath, 'app')
-  const srcPath = path.join(appPath, 'src')
+  const srcPath = path.join(projectPath, 'src')
 
   // Copy auth module
   const authModuleTemplate = path.join(templateDir, 'src', 'modules', 'auth')
@@ -393,8 +391,8 @@ async function copyModuleTemplates(projectPath: string, config: ProjectConfig) {
 }
 
 async function setupModularStructure(projectPath: string, modules: string[]) {
-  // Use app/src/ structure for Client-Generator (Next.js only)
-  const modulesPath = path.join(projectPath, 'app', 'src', 'modules')
+  // Enterprise structure: modules at src/modules (sibling to app/)
+  const modulesPath = path.join(projectPath, 'src', 'modules')
   
   for (const module of modules) {
     const modulePath = path.join(modulesPath, module)
