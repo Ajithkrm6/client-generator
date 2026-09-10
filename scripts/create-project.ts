@@ -358,11 +358,22 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
     fs.copySync(dashboardTemplate, path.join(appPath, 'dashboard'), { overwrite: false })
   }
 
-  // Copy feature-gate library
-  const featureGateTemplate = path.join(baseTemplateDir, 'src', 'lib', 'feature-gate.tsx')
-  if (fs.existsSync(featureGateTemplate)) {
-    fs.ensureDirSync(path.join(srcPath, 'lib'))
-    fs.copySync(featureGateTemplate, path.join(srcPath, 'lib', 'feature-gate.tsx'), { overwrite: false })
+  // Copy utils folder with feature-gate and providers
+  const utilsTemplate = path.join(baseTemplateDir, 'src', 'utils')
+  if (fs.existsSync(utilsTemplate)) {
+    const utilsDestDir = path.join(srcPath, 'utils')
+    fs.ensureDirSync(utilsDestDir)
+    fs.copySync(utilsTemplate, utilsDestDir, { overwrite: true })
+    console.log(chalk.green('✓ Utils folder (feature-gate, providers, query-client) copied'))
+  }
+
+  // Copy shared components folder
+  const sharedTemplate = path.join(baseTemplateDir, 'components', 'shared')
+  if (fs.existsSync(sharedTemplate)) {
+    const sharedDestDir = path.join(srcPath, 'components', 'shared')
+    fs.ensureDirSync(sharedDestDir)
+    fs.copySync(sharedTemplate, sharedDestDir, { overwrite: true })
+    console.log(chalk.green('✓ Shared components (FeatureToggleButton) copied'))
   }
 
   console.log(chalk.green('✓ Reference templates copied'))
@@ -763,7 +774,8 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
     'zod',
     '@hookform/resolvers',
     'axios',
-    'lucide-react'  // Required for icons in landing page and components
+    'lucide-react',  // Required for icons in landing page and components
+    'next-auth'  // Authentication library
   )
 
   // Styling
@@ -810,16 +822,26 @@ async function setupDependencies(projectPath: string, config: ProjectConfig) {
         stdio: 'inherit'
       })
 
-      // Add common components
+      // Add common components (from shared UI library)
       const commonComponents = [
+        'alert',
+        'avatar',
+        'badge',
         'button',
         'card',
-        'badge',
-        'input',
-        'form',
+        'checkbox',
         'dropdown-menu',
+        'input',
+        'label',
+        'select',
+        'textarea',
+        'separator',
+        'sheet',
+        'skeleton',
+        'tooltip',
+        'sidebar',
+        'form',
         'dialog',
-        'avatar',
         'toast',
         'collapsible'  // Required for SideNav and other collapsible UI
       ]

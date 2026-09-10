@@ -1,176 +1,215 @@
 /**
- * Dashboard Page Example
- * Shows how to use layout components, UI components, and stores together
- * This is a reference implementation - modify to fit your needs
+ * Dashboard Page
+ * Main user dashboard showing overview and quick actions
+ * Uses modules: dashboard.store
+ * All components use shadcn/ui for consistency
  */
 
 'use client'
 
-import React, { useState } from 'react'
-import { BarChart3, Users, FileText, TrendingUp } from 'lucide-react'
-import { TopNav } from '@/components/layout/TopNav'
-import { SideNav } from '@/components/layout/SideNav'
-import { LayoutPrimaryChild } from '@/components/layout/LayoutPrimaryChild'
+import { useSession } from 'next-auth/react'
+import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-
-interface StatCardProps {
-  title: string
-  value: string
-  change: string
-  icon: React.ReactNode
-  trend: 'up' | 'down'
-}
-
-const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, trend }) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <div className="text-muted-foreground">{icon}</div>
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-        <TrendingUp className={`h-3 w-3 ${trend === 'down' ? 'rotate-180' : ''}`} />
-        <span>{change}</span>
-      </div>
-    </CardContent>
-  </Card>
-)
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { useDashboardStore } from '@/modules/dashboard/store/dashboard.store'
 
 export default function DashboardPage() {
-  const [sideNavOpen, setSideNavOpen] = useState(false)
-
-  const stats = [
-    {
-      title: 'Total Revenue',
-      value: '$45,231',
-      change: '+2.5% from last month',
-      icon: <BarChart3 className="h-4 w-4" />,
-      trend: 'up' as const,
-    },
-    {
-      title: 'Active Users',
-      value: '2,345',
-      change: '+12 this week',
-      icon: <Users className="h-4 w-4" />,
-      trend: 'up' as const,
-    },
-    {
-      title: 'Transactions',
-      value: '1,234',
-      change: '-3% from last month',
-      icon: <FileText className="h-4 w-4" />,
-      trend: 'down' as const,
-    },
-    {
-      title: 'Growth Rate',
-      value: '23.5%',
-      change: '+4.3% this quarter',
-      icon: <TrendingUp className="h-4 w-4" />,
-      trend: 'up' as const,
-    },
-  ]
-
-  const recentActivities = [
-    { id: 1, title: 'New user registered', time: '2 minutes ago', type: 'user' },
-    { id: 2, title: 'Payment processed', time: '15 minutes ago', type: 'payment' },
-    { id: 3, title: 'New feature deployed', time: '1 hour ago', type: 'system' },
-    { id: 4, title: 'User feedback received', time: '2 hours ago', type: 'feedback' },
-  ]
+  const { data: session } = useSession()
+  const { stats, recentCases, quickActions, teamMembers, upcomingDeadlines, getStatusVariant, getStageVariant } =
+    useDashboardStore()
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <SideNav isOpen={sideNavOpen} onClose={() => setSideNavOpen(false)} />
+    <div className="space-y-8">
+      {/* Welcome Header */}
+      <Card className="bg-gradient-to-r from-blue-600 to-blue-800 border-0 text-white">
+        <CardHeader>
+          <CardTitle className="text-3xl text-white">
+            Welcome back, {session?.user?.name || 'User'}
+          </CardTitle>
+          <CardDescription className="text-blue-100 text-base">
+            Here&apos;s what&apos;s happening with your practice today
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
-      <div className="flex flex-1 flex-col">
-        <TopNav onMenuClick={() => setSideNavOpen(!sideNavOpen)} userName="John Doe" />
-
-        <LayoutPrimaryChild>
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Welcome back! Here's an overview of your application.
-            </p>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
-              <StatCard key={stat.title} {...stat} />
-            ))}
-          </div>
-
-          {/* Main Content Grid */}
-          <div className="grid gap-8 md:grid-cols-3">
-            {/* Chart Section */}
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Revenue Chart</CardTitle>
-                <CardDescription>
-                  Your revenue data for the last 6 months
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-64 flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <BarChart3 className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                  <p>Chart component would render here</p>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon
+          return (
+            <Card key={index}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className={`${stat.color} p-3 rounded-lg`}>
+                    <Icon className="text-white" size={24} />
+                  </div>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
+                    {stat.trend}
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Activity Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Last 4 activities</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-center gap-3">
-                      <div className="h-2 w-2 rounded-full bg-primary" />
-                      <div className="flex-1 text-sm">
-                        <p className="font-medium">{activity.title}</p>
-                        <p className="text-xs text-muted-foreground">{activity.time}</p>
-                      </div>
+                <CardDescription>{stat.title}</CardDescription>
+                <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-2xl font-bold text-foreground mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {quickActions.map((action, index) => {
+            const Icon = action.icon
+            return (
+              <Link key={index} href={action.href}>
+                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <Icon className={`${action.color} mb-2`} size={28} />
+                    <CardTitle className="text-lg">{action.title}</CardTitle>
+                    <CardDescription>{action.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center text-blue-600 group-hover:translate-x-1 transition">
+                      <span className="text-sm font-medium">Get Started</span>
+                      <ArrowRight size={16} className="ml-2" />
                     </div>
-                  ))}
+                  </CardContent>
+                </Card>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Recent Cases */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-foreground">Recent Cases</h2>
+          <Link href="/workpool" className="text-blue-600 hover:text-blue-800 font-medium">
+            View All →
+          </Link>
+        </div>
+
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted border-b border-border">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+                    Client
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+                    Stage
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {recentCases.map((caseItem) => (
+                  <tr key={caseItem.id} className="hover:bg-muted/50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <p className="font-medium text-foreground">{caseItem.client}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                      {caseItem.type}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant={getStageVariant(caseItem.stage)}>{caseItem.stage}</Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant={getStatusVariant(caseItem.status)}>
+                        {caseItem.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                      >
+                        View →
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+
+      {/* Team Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Team Members */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Team Members Online</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {teamMembers.map((member, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarFallback>
+                      {member.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium text-foreground">{member.name}</p>
+                    <p className="text-sm text-muted-foreground">{member.role}</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    member.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
+                  }`}
+                />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
-          {/* Additional Section */}
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>
-                  Common tasks you can perform
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                <Button>View Reports</Button>
-                <Button variant="outline">Export Data</Button>
-                <Button variant="outline">Settings</Button>
-                <Button variant="outline">Help & Support</Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Reference Note */}
-          <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
-            <h3 className="font-semibold">📝 Note for Development</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              This is a reference dashboard page showing how to use the layout components
-              (TopNav, SideNav, LayoutPrimaryChild) together with UI components. Use this
-              as a template for your own dashboard pages.
-            </p>
-          </div>
-        </LayoutPrimaryChild>
+        {/* Upcoming Deadlines */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Upcoming Deadlines</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {upcomingDeadlines.map((deadline, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">{deadline.task}</p>
+                  <p className="text-sm text-muted-foreground">{deadline.date}</p>
+                </div>
+                <Badge
+                  variant={deadline.daysLeft <= 5 ? 'destructive' : 'secondary'}
+                  className="flex-shrink-0"
+                >
+                  {deadline.daysLeft}d
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

@@ -1,5 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
+import { ReactNode } from 'react'
 import './globals.css'
+import { Providers } from '@/utils/providers'
+import { PrimaryLayout } from '@/components/layout/PrimaryLayout'
 
 export const metadata: Metadata = {
   title: 'BS-Frontend-Generator App',
@@ -20,24 +23,26 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0f172a',
+}
+
+interface RootLayoutProps {
+  children: ReactNode
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#0f172a" />
-        <meta name="description" content="Professional frontend application built with BS-Frontend-Generator" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      </head>
-      <body>{children}</body>
+      <body>
+        <Providers>
+          <PrimaryLayout>
+            {children}
+          </PrimaryLayout>
+        </Providers>
+      </body>
     </html>
   )
 }

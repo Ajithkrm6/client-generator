@@ -10,6 +10,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, ExternalLink, Zap, ChevronDown } from 'lucide-react'
 import { getVersion, getPackageInfo } from '@/lib/version'
+import Image from 'next/image'
 
 export default function WelcomePage() {
   const [expandedStep, setExpandedStep] = useState<number | null>(null)
@@ -36,24 +37,8 @@ export default function WelcomePage() {
         <div style={{
           maxWidth: '800px',
           textAlign: 'center'}}
->          {/* Logo Section */}
-          <div style={{
-            marginBottom: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '16px'
-          }}>
-            <img
-              src="/github.png"
-              alt="Client Generator Logo"
-              style={{
-                width: '64px',
-                height: '64px',
-                objectFit: 'contain'
-              }}
-            />
-          </div>
+>        
+
 
           {/* Badge */}
           <div style={{
@@ -83,15 +68,33 @@ export default function WelcomePage() {
           }}>
             This Project is Generated using
             <br />
-            <span style={{
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px'
+            }}>
+            <Image
+              src="/apple-touch-icon.png"
+              alt="Client Generator Logo"
+              width={60}
+              height={60}
+              style={{
+                objectFit: 'contain'
+              }}
+            /> 
+
+             <span style={{
               background: 'linear-gradient(to right, #60a5fa, #a78bfa, #f472b6)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              display: 'inline-block'
+             display: 'inline-block'
+
             }}>
-              Client Generator v{version}
+             Client Generator v{version}
             </span>
+            </div>
           </h1>
 
           {/* Developer Credit */}
@@ -109,7 +112,7 @@ export default function WelcomePage() {
               letterSpacing: '0.5px',
               margin: 0
             }}>
-              Developed by Ajith Kumar
+              Created by Ajith Kumar
             </p>
             <a
               href="https://github.com/Ajithkrm6"
