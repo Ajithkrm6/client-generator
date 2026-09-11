@@ -4,6 +4,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { execSync } from 'child_process'
 import { fileURLToPath } from 'url'
+import crypto from 'crypto'
 import { PHASE1_QUESTIONS, PHASE2_QUESTIONS } from './questionnaire.config.js'
 
 // ES Module workaround for __dirname
@@ -155,38 +156,56 @@ export async function createProject(appName: string) {
 
     // Create src/ directory structure (sibling to app/) for Client-Generator code (Phase 2 additions)
     if (framework === 'nextjs') {
-      const srcPath = path.join(projectPath, 'src')
-      const tsconfigPath = path.join(projectPath, 'tsconfig.json')
-      
-      // Create src/ and subdirectories at root level (sibling to app/)
-      fs.ensureDirSync(srcPath)
-      const srcSubdirs = ['components', 'lib', 'modules', 'hooks', 'config', 'types', 'stores']
-      for (const dir of srcSubdirs) {
-        fs.ensureDirSync(path.join(srcPath, dir))
-      }
-      
-      // Create ui components subdirectory for shadcn
-      fs.ensureDirSync(path.join(srcPath, 'components', 'ui'))
-      
-      // Update tsconfig paths to point to src/ (enterprise production-ready structure)
-      // This allows imports like @/components, @/modules, etc to work with src/components, src/modules
-      if (fs.existsSync(tsconfigPath)) {
-        try {
-          const tsconfigContent = fs.readFileSync(tsconfigPath, 'utf-8')
-          const tsconfig = JSON.parse(tsconfigContent)
-          if (tsconfig.compilerOptions) {
-            // Update paths to use src/ structure (sibling to app/)
-            tsconfig.compilerOptions.paths = {
-              '@/*': ['src/*']
-            }
+      try {
+        const srcPath = path.join(projectPath, 'src')
+        const tsconfigPath = path.join(projectPath, 'tsconfig.json')
+        
+        // Create src/ and subdirectories at root level (sibling to app/)
+        fs.ensureDirSync(srcPath)
+        const srcSubdirs = ['components', 'lib', 'modules', 'hooks', 'config', 'types', 'stores']
+        for (const dir of srcSubdirs) {
+          const dirPath = path.join(srcPath, dir)
+          fs.ensureDirSync(dirPath)
+          if (!fs.existsSync(dirPath)) {
+            throw new Error(`Failed to create directory: ${dirPath}`)
           }
-          fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2))
-        } catch (error) {
-          console.log(chalk.yellow('  ⚠️  Could not update tsconfig paths'))
         }
+        
+        // Create ui components subdirectory for shadcn
+        const uiPath = path.join(srcPath, 'components', 'ui')
+        fs.ensureDirSync(uiPath)
+        if (!fs.existsSync(uiPath)) {
+          throw new Error(`Failed to create ui components directory: ${uiPath}`)
+        }
+        
+        // Verify src directory was actually created
+        if (!fs.existsSync(srcPath)) {
+          throw new Error(`src/ directory was not created at ${srcPath}`)
+        }
+        
+        // Update tsconfig paths to point to src/ (enterprise production-ready structure)
+        // This allows imports like @/components, @/modules, etc to work with src/components, src/modules
+        if (fs.existsSync(tsconfigPath)) {
+          try {
+            const tsconfigContent = fs.readFileSync(tsconfigPath, 'utf-8')
+            const tsconfig = JSON.parse(tsconfigContent)
+            if (tsconfig.compilerOptions) {
+              // Update paths to use src/ structure (sibling to app/)
+              tsconfig.compilerOptions.paths = {
+                '@/*': ['src/*']
+              }
+            }
+            fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2))
+          } catch (error) {
+            console.log(chalk.yellow('  ⚠️  Could not update tsconfig paths'))
+          }
+        }
+        
+        console.log(chalk.green('✓ src/ directory structure created (sibling to app/)'))
+      } catch (error: any) {
+        console.error(chalk.red(`❌ Error creating src/ structure: ${error.message}`))
+        throw error
       }
-      
-      console.log(chalk.green('✓ src/ directory structure created (sibling to app/)'))
     }
 
     console.log(chalk.green(`✓ ${framework.toUpperCase()} project created (pnpm-only)\n`))
@@ -374,6 +393,27 @@ async function copyReferenceTemplates(projectPath: string, config: ProjectConfig
     fs.ensureDirSync(sharedDestDir)
     fs.copySync(sharedTemplate, sharedDestDir, { overwrite: true })
     console.log(chalk.green('✓ Shared components (FeatureToggleButton) copied'))
+  }
+
+  // Copy NextAuth API route
+  const authApiTemplate = path.join(baseTemplateDir, 'app', 'api', 'auth')
+  if (fs.existsSync(authApiTemplate)) {
+    const authApiDest = path.join(appPath, 'api', 'auth')
+    fs.ensureDirSync(authApiDest)
+    
+    // Copy auth directory files
+    fs.copySync(authApiTemplate, authApiDest, { overwrite: true })
+    
+    // Handle the [...nextauth] special folder naming
+    const nextauthRouteTemplate = path.join(authApiDest, 'nextauth-route.ts')
+    if (fs.existsSync(nextauthRouteTemplate)) {
+      const nextauthFolder = path.join(authApiDest, '[...nextauth]')
+      fs.ensureDirSync(nextauthFolder)
+      fs.copyFileSync(nextauthRouteTemplate, path.join(nextauthFolder, 'route.ts'))
+      fs.removeSync(nextauthRouteTemplate) // Clean up temp file
+    }
+    
+    console.log(chalk.green('✓ NextAuth API route configured'))
   }
 
   console.log(chalk.green('✓ Reference templates copied'))
@@ -725,9 +765,34 @@ export default apiClient
 }
 
 async function setupEnvFiles(projectPath: string, backendUrl: string) {
+  // Generate a random NEXTAUTH_SECRET for development
+  const generateSecret = () => {
+    return crypto.randomBytes(32).toString('hex')
+  }
+
   const envContent = `# Backend API Configuration
 NEXT_PUBLIC_API_URL="${backendUrl}"
 VITE_API_URL="${backendUrl}"
+
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="${generateSecret()}"
+
+# Application
+APP_NAME="project"
+NODE_ENV="development"
+
+# Features
+NEXT_PUBLIC_ENABLE_STORYBOOK=true
+`
+
+  const envExample = `# Backend API Configuration
+NEXT_PUBLIC_API_URL="http://your-backend-url.com"
+VITE_API_URL="http://your-backend-url.com"
+
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key-here-generate-with-openssl-rand-hex-32"
 
 # Application
 APP_NAME="project"
@@ -737,9 +802,9 @@ NODE_ENV="development"
 NEXT_PUBLIC_ENABLE_STORYBOOK=true
 `
   
-  fs.writeFileSync(path.join(projectPath, '.env.example'), envContent)
+  fs.writeFileSync(path.join(projectPath, '.env.example'), envExample)
   fs.writeFileSync(path.join(projectPath, '.env.local'), envContent)
-  console.log(chalk.green('✓ Environment files created'))
+  console.log(chalk.green('✓ Environment files created with NextAuth configuration'))
 }
 
 function formatName(str: string): string {
